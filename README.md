@@ -4,7 +4,7 @@ Repositorio para el TP2 de la materia **Simulación de Sistemas** (ITBA).
 
 Simulación de un modelo de enjambre tipo Vicsek usando un Autómata Celular Off-Lattice con método de celdas para búsqueda eficiente de vecinos.
 
-> **Nota:** El modelo Voter no está implementado aún.
+> **Nota:** El modelo Voter está implementado (`ModelType::Voter`). Cada partícula copia la dirección de un vecino elegido al azar dentro de su radio de interacción; si no tiene vecinos, conserva su propia dirección (más ruido).
 
 ## Requisitos
 

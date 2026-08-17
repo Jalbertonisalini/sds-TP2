@@ -51,14 +51,14 @@ std::vector<Particle> generate_particles(const SimulationConfig& config, int N, 
 int main() {
     SimulationConfig config;
     config.L = 10.0;           // Caja cuadrada[cite: 1]
-    config.density = 8;      // Seleccionamos rho = 4 para esta corrida[cite: 1]
+    config.density = 4;      // Seleccionamos rho = 4 para esta corrida[cite: 1]
     config.rc = 1.0;
     config.r_max = 0.0;        // Partículas off-lattice puntuales
     config.eta = 0.5;          // Ruido de prueba
     config.velocity = 0.03;
     config.iterations = 10000;
-    config.model = ModelType::Standard; // Cambiar a Voter para el otro escenario[cite: 1]
-    
+    config.model = ModelType::Voter; // Cambiar a Voter para el otro escenario[cite: 1]
+
     bool allow_overlap = false; // Flag requerido
     
     int N = static_cast<int>(config.density * config.L * config.L);

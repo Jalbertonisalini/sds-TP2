@@ -57,16 +57,19 @@ void SimulationEngine::update_vicsek(std::vector<Particle>& next_state) {
 void SimulationEngine::update_voter(std::vector<Particle>& next_state) {
     for (size_t i = 0; i < particles.size(); ++i) {
         auto neighbors = cim.get_neighbors(particles, i);
-        
-        // Incluimos a la propia partícula como opción elegible
-        neighbors.push_back(i); 
+
+        // Sin vecinos: la partícula se copia a sí misma (único fallback)
+        if (neighbors.empty()) {
+            neighbors.push_back(i);
+        }
 
         // Selección de un agente al azar
         std::uniform_int_distribution<int> neighbor_dist(0, neighbors.size() - 1);
         int chosen_idx = neighbors[neighbor_dist(gen)];
 
-        // Copia de dirección + ruido
-        next_state[i].angle = particles[chosen_idx].angle + noise_dist(gen);
+        // Copia de dirección + ruido (envuelto a [-pi, pi] para evitar drift sin límite)
+        double copied_angle = particles[chosen_idx].angle + noise_dist(gen);
+        next_state[i].angle = std::atan2(std::sin(copied_angle), std::cos(copied_angle));
 
         // Actualización de posición (Euler)
         next_state[i].position.x += config.velocity * std::cos(next_state[i].angle);
