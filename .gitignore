@@ -67,3 +67,9 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# macOS
+.DS_Store
+
+# Gráficos generados por los scripts de análisis
+python/output/

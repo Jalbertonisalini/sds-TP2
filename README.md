@@ -50,6 +50,15 @@ python animar_simulacion.py
 
 Lee el CSV generado y muestra una animación de las partículas con matplotlib.
 
+### Análisis: Polarización
+
+```bash
+cd python
+python polarizacion.py
+```
+
+Lee el CSV generado y calcula la polarización `va(t) = |<vector velocidad unitario>|` promediada sobre las partículas en cada timestep. Grafica la evolución temporal, detecta automáticamente el inicio del régimen estacionario (MSER sobre promedios por bloque) y reporta `<va>` con su desvío en ese tramo. Guarda el gráfico en `python/output/polarizacion_vs_tiempo.png`.
+
 ## Parámetros de simulación
 
 Los parámetros están definidos en `src/main.cpp`:
@@ -84,6 +93,7 @@ sds-TP2/
 │   └── SimulationEngine.cpp
 ├── python/
 │   ├── animar_simulacion.py
+│   ├── polarizacion.py
 │   └── requirements.txt
 ├── build/
 │   └── simulador
