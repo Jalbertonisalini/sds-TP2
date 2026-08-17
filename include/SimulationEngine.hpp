@@ -1,0 +1,30 @@
+#pragma once
+#include <vector>
+#include <random>
+#include "Particle.hpp"
+#include "Config.hpp"
+#include "CellIndexMethod.hpp"
+
+class SimulationEngine {
+private:
+    SimulationConfig config;
+    CellIndexMethod cim;
+    std::vector<Particle> particles;
+    
+    // Motor de aleatoriedad
+    std::mt19937 gen;
+    std::uniform_real_distribution<double> noise_dist;
+
+    // Reglas de evolución
+    void update_vicsek(std::vector<Particle>& next_state);
+    void update_voter(std::vector<Particle>& next_state);
+
+public:
+    SimulationEngine(const SimulationConfig& cfg, const std::vector<Particle>& initial_state);
+
+    // Avanza la simulación un paso temporal (t -> t+1)
+    void step();
+
+    // Devuelve el estado actual para poder guardarlo
+    const std::vector<Particle>& get_particles() const;
+};
