@@ -76,19 +76,37 @@ Lee el CSV generado y calcula la polarización `va(t) = |<vector velocidad unita
 
 ### Experimento: Ruido en Vicsek
 
-Estudio del efecto del ruido η sobre la polarización: una corrida por nivel de ruido (η = 0.6, 2.2 y 5.3, con ρ = 4 y modelo Standard). Cada caso corre por separado y guarda su propia serie temporal en `build/resultados/`:
+Dos estudios del efecto del ruido η sobre la polarización (ρ = 4, modelo Standard), cada uno con sus propios resultados:
+
+**a) Comparación de 3 ruidos** — una corrida por nivel de ruido (η = 0.6, 2.2 y 5.3); cada caso guarda su serie temporal `va(t)` en `build/resultados/` y luego se combinan en un único gráfico comparativo (`python/output/polarizacion_comparacion.png`):
 
 ```bash
 cd python
-python correr_ruido.py
+python correr_ruido.py                 # corre los 3 casos
+python polarizacion_comparacion.py     # grafica las 3 curvas juntas
 ```
 
-Los valores de η (y densidad/pasos) se editan al inicio de `correr_ruido.py`. Luego se combinan las tres series en un único gráfico comparativo `python/output/polarizacion_comparacion.png`:
+Se puede correr un subconjunto: `python correr_ruido.py 0.6 2.2`.
+
+**b) Barrido η = 0 → 5** — curva de polarización estacionaria vs ruido con barras de error. Para cada η del barrido (definido en `RANGO_RUIDO` al inicio de `correr_ruido.py`) se genera una serie `va(t)`, se detecta el inicio del régimen estacionario (MSER, reutilizando la lógica de `polarizacion.py`) y se calcula `⟨va⟩ ± σ` sobre esa ventana. Resultados en `build/resultados/barrido_ruido/`:
 
 ```bash
 cd python
-python polarizacion_comparacion.py
+python correr_ruido.py --directorio barrido_ruido          # barrido completo (resume: saltea los que ya existen)
+python polarizacion_vs_ruido.py                            # resumen CSV + gráfico con barras de error
 ```
+
+Opciones útiles de `correr_ruido.py`:
+
+| Opción | Descripción |
+|--------|-------------|
+| `valores_eta...` | Corre sólo esos valores (ej: `0.6 2.2 5.3`) |
+| `--rango IN FIN PASO` | Usa otro rango en vez de `RANGO_RUIDO` |
+| `--pasos N` | Pasos por corrida (default 20000) |
+| `--directorio NOM` | Guarda los resultados en `build/resultados/NOM/` |
+| `--forzar` | Re-corre aunque el CSV ya exista |
+
+Salidas del estudio b): `resumen_polarizacion_vs_eta.csv` (columnas `eta, va_media, va_std, inicio_estacionario, pasos_totales`) y el gráfico `python/output/polarizacion_vs_eta.png`.
 
 ## Parámetros de simulación
 
@@ -128,6 +146,7 @@ sds-TP2/
 │   ├── polarizacion.py
 │   ├── correr_ruido.py
 │   ├── polarizacion_comparacion.py
+│   ├── polarizacion_vs_ruido.py
 │   └── requirements.txt
 ├── build/
 │   ├── simulador
