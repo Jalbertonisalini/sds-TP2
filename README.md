@@ -39,7 +39,22 @@ cd build
 ./simulador
 ```
 
-Ejecuta 10.000 pasos de simulación y genera el archivo `evolucion_dinamica.csv`.
+Sin opciones, ejecuta 10.000 pasos con la configuración por defecto y genera el archivo `evolucion_dinamica.csv` (trayectoria completa). Los parámetros pueden sobrescribirse por línea de comandos:
+
+```bash
+./simulador --model standard --density 4 --eta 0.6 --iterations 10000 --output resultados/mi_corrida.csv
+```
+
+| Opción | Default | Descripción |
+|--------|---------|-------------|
+| `--density` | 4 | Densidad de partículas (N = density × L²) |
+| `--eta` | 0.5 | Amplitud del ruido |
+| `--iterations` | 10000 | Cantidad de pasos |
+| `--model` | `voter` | Modelo de interacción: `standard` (Vicsek) o `voter` |
+| `--seed` | 42 | Semilla de aleatoriedad (condición inicial y ruido) |
+| `--output` | *(vacío)* | Si se indica, en vez de la trayectoria completa escribe un CSV compacto `Time,Polarization` con un valor por paso |
+
+Los parámetros fijos (`L = 10`, `rc = 1.0`, `velocity = 0.03`) están definidos en `src/main.cpp`.
 
 ### Visualización
 
@@ -59,20 +74,37 @@ python polarizacion.py
 
 Lee el CSV generado y calcula la polarización `va(t) = |<vector velocidad unitario>|` promediada sobre las partículas en cada timestep. Grafica la evolución temporal, detecta automáticamente el inicio del régimen estacionario (MSER sobre promedios por bloque) y reporta `<va>` con su desvío en ese tramo. Guarda el gráfico en `python/output/polarizacion_vs_tiempo.png`.
 
+### Experimento: Ruido en Vicsek
+
+Estudio del efecto del ruido η sobre la polarización: una corrida por nivel de ruido (η = 0.6, 2.2 y 5.3, con ρ = 4 y modelo Standard). Cada caso corre por separado y guarda su propia serie temporal en `build/resultados/`:
+
+```bash
+cd python
+python correr_ruido.py
+```
+
+Los valores de η (y densidad/pasos) se editan al inicio de `correr_ruido.py`. Luego se combinan las tres series en un único gráfico comparativo `python/output/polarizacion_comparacion.png`:
+
+```bash
+cd python
+python polarizacion_comparacion.py
+```
+
 ## Parámetros de simulación
 
-Los parámetros están definidos en `src/main.cpp`:
+Los valores por defecto están definidos en `src/main.cpp` y pueden sobrescribirse con las opciones CLI de la sección Ejecución:
 
-| Parámetro | Valor | Descripción |
-|-----------|-------|-------------|
-| `L` | 10.0 | Lado de la caja cuadrada |
-| `density` | 8 | Densidad de partículas (N = density × L²) |
-| `rc` | 1.0 | Radio de interacción |
+| Parámetro | Default | Descripción |
+|-----------|---------|-------------|
+| `L` | 10.0 | Lado de la caja cuadrada (fijo) |
+| `density` | 4 | Densidad de partículas (N = density × L²) |
+| `rc` | 1.0 | Radio de interacción (fijo) |
 | `r_max` | 0.0 | Radio máximo de partículas (puntuales) |
 | `eta` | 0.5 | Amplitud del ruido |
-| `velocity` | 0.03 | Velocidad de las partículas |
+| `velocity` | 0.03 | Velocidad de las partículas (fija) |
 | `iterations` | 10000 | Cantidad de pasos |
-| `model` | `Standard` | Modelo: `Standard` (Vicsek) |
+| `model` | `Voter` | Modelo: `standard` (Vicsek) o `voter` |
+| `seed` | 42 | Semilla de aleatoriedad |
 
 ## Estructura del proyecto
 
@@ -94,11 +126,14 @@ sds-TP2/
 ├── python/
 │   ├── animar_simulacion.py
 │   ├── polarizacion.py
+│   ├── correr_ruido.py
+│   ├── polarizacion_comparacion.py
 │   └── requirements.txt
 ├── build/
-│   └── simulador
+│   ├── simulador
+│   └── resultados/          # Series de polarización por experimento
 └── docs/
-    └── TP2_Enunciado.pdf
+    └── TP2_Enunciado.md
 ```
 
 ## Output
@@ -110,3 +145,9 @@ Time, ID, X, Y, Angle, Radius
 ```
 
 Cada fila representa el estado de una partícula en un instante de tiempo.
+
+Los CSV de experimento (`build/resultados/*.csv`) tienen en cambio un único valor por paso:
+
+```
+Time, Polarization
+```

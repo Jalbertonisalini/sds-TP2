@@ -20,11 +20,15 @@ private:
     void update_voter(std::vector<Particle>& next_state);
 
 public:
-    SimulationEngine(const SimulationConfig& cfg, const std::vector<Particle>& initial_state);
+    SimulationEngine(const SimulationConfig& cfg, const std::vector<Particle>& initial_state,
+                     unsigned int seed = 42);
 
     // Avanza la simulación un paso temporal (t -> t+1)
     void step();
 
     // Devuelve el estado actual para poder guardarlo
     const std::vector<Particle>& get_particles() const;
+
+    // Polarización instantánea va = |<(cos θ, sin θ)>| sobre las partículas
+    double polarizacion() const;
 };

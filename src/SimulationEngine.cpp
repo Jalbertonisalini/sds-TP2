@@ -2,8 +2,9 @@
 #include <cmath>
 #include <algorithm>
 
-SimulationEngine::SimulationEngine(const SimulationConfig& cfg, const std::vector<Particle>& initial_state)
-    : config(cfg), cim(cfg), particles(initial_state), gen(42) {
+SimulationEngine::SimulationEngine(const SimulationConfig& cfg, const std::vector<Particle>& initial_state,
+                                   unsigned int seed)
+    : config(cfg), cim(cfg), particles(initial_state), gen(seed) {
     
     // El ruido se define típicamente en el intervalo [-eta/2, eta/2]
     noise_dist = std::uniform_real_distribution<double>(-config.eta / 2.0, config.eta / 2.0);
@@ -11,6 +12,18 @@ SimulationEngine::SimulationEngine(const SimulationConfig& cfg, const std::vecto
 
 const std::vector<Particle>& SimulationEngine::get_particles() const {
     return particles;
+}
+
+// Mismo criterio que python/polarizacion.py: va = |promedio de vectores unitarios|
+double SimulationEngine::polarizacion() const {
+    double ux = 0.0;
+    double uy = 0.0;
+    for (const auto& p : particles) {
+        ux += std::cos(p.angle);
+        uy += std::sin(p.angle);
+    }
+    double n = static_cast<double>(particles.size());
+    return std::hypot(ux / n, uy / n);
 }
 
 void SimulationEngine::step() {

@@ -11,6 +11,15 @@ OutputWriter::OutputWriter(const std::string& filename) {
     file << "Time,ID,X,Y,Angle,Radius\n";
 }
 
+// Serie temporal escalar con encabezado a medida (ej. "Time,Polarization")
+OutputWriter::OutputWriter(const std::string& filename, const std::string& header) {
+    file.open(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Error: No se pudo abrir el archivo de salida " + filename);
+    }
+    file << header << "\n";
+}
+
 // Cierre seguro
 OutputWriter::~OutputWriter() {
     if (file.is_open()) {
@@ -28,6 +37,11 @@ void OutputWriter::save_step(int time_step, const std::vector<Particle>& particl
              << p.angle << ","
              << p.radius << "\n";
     }
+}
+
+// Escritura de un valor escalar por paso temporal
+void OutputWriter::save_scalar(int time_step, double value) {
+    file << time_step << "," << value << "\n";
 }
 
 // --- Métodos estáticos auxiliares ---

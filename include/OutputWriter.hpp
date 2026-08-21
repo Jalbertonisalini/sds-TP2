@@ -11,12 +11,18 @@ private:
 public:
     // Constructor: abre el archivo dinámico y escribe los encabezados
     explicit OutputWriter(const std::string& filename);
+
+    // Serie temporal escalar (ej. polarización): encabezado personalizado
+    OutputWriter(const std::string& filename, const std::string& header);
     
     // Destructor: se encarga de cerrar el archivo automáticamente (RAII)
     ~OutputWriter();
 
     // Volcar el estado de un instante de tiempo t
     void save_step(int time_step, const std::vector<Particle>& particles);
+
+    // Volcar un valor escalar del instante t (serie temporal)
+    void save_scalar(int time_step, double value);
 
     // Métodos estáticos (opcionales, para fotos estáticas o debug)
     static void save_positions(const std::string& filename, const std::vector<Particle>& particles);
