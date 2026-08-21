@@ -102,11 +102,24 @@ Opciones útiles de `correr_ruido.py`:
 |--------|-------------|
 | `valores_eta...` | Corre sólo esos valores (ej: `0.6 2.2 5.3`) |
 | `--rango IN FIN PASO` | Usa otro rango en vez de `RANGO_RUIDO` |
+| `--modelo MOD` | Modelo de interacción: `standard` (default) o `voter` |
 | `--pasos N` | Pasos por corrida (default 20000) |
 | `--directorio NOM` | Guarda los resultados en `build/resultados/NOM/` |
 | `--forzar` | Re-corre aunque el CSV ya exista |
 
 Salidas del estudio b): `resumen_polarizacion_vs_eta.csv` (columnas `eta, va_media, va_std, inicio_estacionario, pasos_totales`) y el gráfico `python/output/polarizacion_vs_eta.png`.
+
+**Repetir el barrido con el modelo Voter**: cada modelo se aísla en su propio directorio para no mezclar resultados:
+
+```bash
+cd python
+python correr_ruido.py --modelo voter --directorio barrido_ruido_voter
+python polarizacion_vs_ruido.py --directorio barrido_ruido_voter \
+    --salida polarizacion_vs_eta_voter.png \
+    --titulo "Polarización estacionaria $\\langle v_a \\rangle$ vs ruido $\\eta$ (modelo Voter)"
+```
+
+`polarizacion_vs_ruido.py` acepta además `--titulo` para personalizar el título del gráfico.
 
 ## Parámetros de simulación
 
