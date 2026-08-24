@@ -111,10 +111,12 @@ python plot/clusters_vs_eta.py
 python plot/polarizacion_vs_S.py
 ```
 
-Si los CSVs están en un subdirectorio (ej: `build/resultados/barrido_voter/`):
+`polarizacion_vs_eta.py` acepta `--directorio` repetible: cada aparición agrega una línea (una densidad) al mismo gráfico, con error bars. Sin `--directorio` grafica `rho4` por defecto.
 
 ```bash
-python plot/polarizacion_vs_eta.py --directorio barrido_voter
+python plot/polarizacion_vs_eta.py --directorio rho4                       # solo rho4 (default)
+python plot/polarizacion_vs_eta.py --directorio rho2 --directorio rho4 --directorio rho8   # las 3 densidades superpuestas
+python plot/polarizacion_vs_eta.py --directorio barrido_voter --titulo "Modelo Voter"
 ```
 
 **Comparación de ruidos** (superponer curvas):
