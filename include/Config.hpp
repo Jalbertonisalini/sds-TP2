@@ -6,13 +6,13 @@ enum class ModelType {
 };
 
 struct SimulationConfig {
-    double L = 10.0;           // Lado de la caja
-    double density = 2.0;      // Densidades a estudiar
-    double eta = 0.1;          // Ruido
+    double L = 10.0;
+    double density = 4;
+    double eta = 0.5;
     double rc = 1.0;
-    double r_max = 0.0;        // Radio máximo para calcular celdas
-    bool periodic = true;      // Toggle de condiciones periódicas
+    double r_max = 0.0;
+    bool periodic = true;
     double velocity = 0.03;
-    int iterations = 1000;
-    ModelType model = ModelType::Standard;
+    int iterations = 20000;
+    ModelType model = ModelType::Voter;
 };

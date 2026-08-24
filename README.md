@@ -4,8 +4,6 @@ Repositorio para el TP2 de la materia **Simulación de Sistemas** (ITBA).
 
 Simulación de un modelo de enjambre tipo Vicsek usando un Autómata Celular Off-Lattice con método de celdas para búsqueda eficiente de vecinos.
 
-> **Nota:** El modelo Voter está implementado (`ModelType::Voter`). Cada partícula copia la dirección de un vecino elegido al azar dentro de su radio de interacción; si no tiene vecinos, conserva su propia dirección (más ruido).
-
 ## Requisitos
 
 - **C++17** (o superior)
@@ -39,102 +37,115 @@ cd build
 ./simulador
 ```
 
-Sin opciones, ejecuta 10.000 pasos con la configuración por defecto y genera el archivo `evolucion_dinamica.csv` (trayectoria completa). Los parámetros pueden sobrescribirse por línea de comandos:
+Sin opciones, ejecuta 20.000 pasos con la configuración por defecto y genera `evolucion_dinamica.csv` (trayectoria completa). Los parámetros pueden sobrescribirse:
 
 ```bash
-./simulador --model standard --density 4 --eta 0.6 --iterations 10000 --output resultados/mi_corrida.csv
+./simulador --model standard --density 4 --eta 0.6 --iterations 20000 --output resultados/mi_corrida.csv
 ```
 
 | Opción | Default | Descripción |
 |--------|---------|-------------|
 | `--density` | 4 | Densidad de partículas (N = density × L²) |
 | `--eta` | 0.5 | Amplitud del ruido |
-| `--iterations` | 10000 | Cantidad de pasos |
-| `--model` | `voter` | Modelo de interacción: `standard` (Vicsek) o `voter` |
-| `--seed` | 42 | Semilla de aleatoriedad (condición inicial y ruido) |
-| `--output` | *(vacío)* | Si se indica, en vez de la trayectoria completa escribe un CSV compacto `Time,Polarization` con un valor por paso |
+| `--iterations` | 20000 | Cantidad de pasos |
+| `--model` | `voter` | Modelo: `standard` (Vicsek) o `voter` |
+| `--seed` | 42 | Semilla de aleatoriedad |
+| `--output` | *(vacío)* | CSV compacto `Time,Polarization,S` (un valor por paso) |
 
-Los parámetros fijos (`L = 10`, `rc = 1.0`, `velocity = 0.03`) están definidos en `src/main.cpp`.
+### Barrido de ruido
 
-### Visualización
-
-```bash
-cd python
-python animar_simulacion.py
-```
-
-Lee el CSV generado y muestra una animación de las partículas con matplotlib.
-
-### Análisis: Polarización
+`run.py` ejecuta el binario `./simulador` por cada valor de η, generando un CSV por caso en `build/resultados/`.
 
 ```bash
 cd python
-python polarizacion.py
+
+# Un solo η
+python run.py 0.6 --pasos 20000
+
+# Varios η específicos
+python run.py 0.6 2.2 5.3 --pasos 20000
+
+# Barrido completo η = 0 → 5 con paso 0.25
+python run.py --rango 0.0 5.0 0.25 --pasos 20000
+
+# Barrido con modelo Standard y densidad 1
+python run.py --rango 0.0 5.0 0.25 --modelo standard --density 1 --pasos 20000
+
+# Guardar en subdirectorio (ej: para comparar modelos)
+python run.py --rango 0.0 5.0 0.25 --directorio barrido_voter
+
+# Re-corre aunque los CSVs ya existan
+python run.py --rango 0.0 5.0 0.25 --forzar
 ```
 
-Lee el CSV generado y calcula la polarización `va(t) = |<vector velocidad unitario>|` promediada sobre las partículas en cada timestep. Grafica la evolución temporal, detecta automáticamente el inicio del régimen estacionario (MSER sobre promedios por bloque) y reporta `<va>` con su desvío en ese tramo. Guarda el gráfico en `python/output/polarizacion_vs_tiempo.png`.
-
-### Experimento: Ruido en Vicsek
-
-Dos estudios del efecto del ruido η sobre la polarización (ρ = 4, modelo Standard), cada uno con sus propios resultados:
-
-**a) Comparación de 3 ruidos** — una corrida por nivel de ruido (η = 0.6, 2.2 y 5.3); cada caso guarda su serie temporal `va(t)` en `build/resultados/` y luego se combinan en un único gráfico comparativo (`python/output/polarizacion_comparacion.png`):
-
-```bash
-cd python
-python correr_ruido.py                 # corre los 3 casos
-python polarizacion_comparacion.py     # grafica las 3 curvas juntas
-```
-
-Se puede correr un subconjunto: `python correr_ruido.py 0.6 2.2`.
-
-**b) Barrido η = 0 → 5** — curva de polarización estacionaria vs ruido con barras de error. Para cada η del barrido (definido en `RANGO_RUIDO` al inicio de `correr_ruido.py`) se genera una serie `va(t)`, se detecta el inicio del régimen estacionario (MSER, reutilizando la lógica de `polarizacion.py`) y se calcula `⟨va⟩ ± σ` sobre esa ventana. Resultados en `build/resultados/barrido_ruido/`:
-
-```bash
-cd python
-python correr_ruido.py --directorio barrido_ruido          # barrido completo (resume: saltea los que ya existen)
-python polarizacion_vs_ruido.py                            # resumen CSV + gráfico con barras de error
-```
-
-Opciones útiles de `correr_ruido.py`:
+Opciones de `run.py`:
 
 | Opción | Descripción |
 |--------|-------------|
 | `valores_eta...` | Corre sólo esos valores (ej: `0.6 2.2 5.3`) |
-| `--rango IN FIN PASO` | Usa otro rango en vez de `RANGO_RUIDO` |
-| `--modelo MOD` | Modelo de interacción: `standard` (default) o `voter` |
-| `--pasos N` | Pasos por corrida (default 20000) |
-| `--directorio NOM` | Guarda los resultados en `build/resultados/NOM/` |
+| `--rango IN FIN PASO` | Rango de ruidos |
+| `--density N` | Densidad |
+| `--pasos N` | Pasos por corrida |
+| `--modelo MOD` | `standard` o `voter` |
+| `--directorio NOM` | Subdirectorio en `build/resultados/` |
 | `--forzar` | Re-corre aunque el CSV ya exista |
 
-Salidas del estudio b): `resumen_polarizacion_vs_eta.csv` (columnas `eta, va_media, va_std, inicio_estacionario, pasos_totales`) y el gráfico `python/output/polarizacion_vs_eta.png`.
+### Gráficos
 
-**Repetir el barrido con el modelo Voter**: cada modelo se aísla en su propio directorio para no mezclar resultados:
+Todos los scripts de gráficos están en `python/plot/`. Los de tiempo usan `--input` con la ruta al CSV. Los de barrido usan `--directorio` con la carpeta de resultados.
+
+**Evolución temporal** (para un caso individual):
 
 ```bash
 cd python
-python correr_ruido.py --modelo voter --directorio barrido_ruido_voter
-python polarizacion_vs_ruido.py --directorio barrido_ruido_voter \
-    --salida polarizacion_vs_eta_voter.png \
-    --titulo "Polarización estacionaria $\\langle v_a \\rangle$ vs ruido $\\eta$ (modelo Voter)"
+python plot/polarizacion_vs_tiempo.py --input ../build/resultados/ruido_eta0.6.csv
+python plot/clusters_vs_tiempo.py --input ../build/resultados/ruido_eta0.6.csv
 ```
 
-`polarizacion_vs_ruido.py` acepta además `--titulo` para personalizar el título del gráfico.
+**Barrido vs η** (para un directorio con múltiples η):
+
+```bash
+cd python
+python plot/polarizacion_vs_eta.py
+python plot/clusters_vs_eta.py
+python plot/polarizacion_vs_S.py
+```
+
+Si los CSVs están en un subdirectorio (ej: `build/resultados/barrido_voter/`):
+
+```bash
+python plot/polarizacion_vs_eta.py --directorio barrido_voter
+```
+
+**Comparación de ruidos** (superponer curvas):
+
+```bash
+cd python
+python plot/comparacion_ruido.py 0.6 2.2 5.3
+```
+
+**Animación** (requiere CSV de trayectoria completa):
+
+```bash
+cd python
+python plot/animacion.py --input ../build/evolucion_dinamica.csv
+```
+
+Los gráficos se guardan en `python/output/`.
 
 ## Parámetros de simulación
 
-Los valores por defecto están definidos en `src/main.cpp` y pueden sobrescribirse con las opciones CLI de la sección Ejecución:
+Los parámetros fijos (`L = 10`, `rc = 1.0`, `velocity = 0.03`) están en `src/main.cpp` y `python/config.py`.
 
 | Parámetro | Default | Descripción |
 |-----------|---------|-------------|
-| `L` | 10.0 | Lado de la caja cuadrada (fijo) |
-| `density` | 4 | Densidad de partículas (N = density × L²) |
-| `rc` | 1.0 | Radio de interacción (fijo) |
-| `r_max` | 0.0 | Radio máximo de partículas (puntuales) |
+| `L` | 10.0 | Lado de la caja cuadrada |
+| `density` | 4 | Densidad de partículas |
+| `rc` | 1.0 | Radio de interacción |
 | `eta` | 0.5 | Amplitud del ruido |
-| `velocity` | 0.03 | Velocidad de las partículas (fija) |
-| `iterations` | 10000 | Cantidad de pasos |
-| `model` | `Voter` | Modelo: `standard` (Vicsek) o `voter` |
+| `velocity` | 0.03 | Velocidad de las partículas |
+| `iterations` | 20000 | Cantidad de pasos |
+| `model` | `voter` | Modelo: `standard` o `voter` |
 | `seed` | 42 | Semilla de aleatoriedad |
 
 ## Estructura del proyecto
@@ -155,31 +166,33 @@ sds-TP2/
 │   ├── OutputWriter.cpp
 │   └── SimulationEngine.cpp
 ├── python/
-│   ├── animar_simulacion.py
-│   ├── polarizacion.py
-│   ├── correr_ruido.py
-│   ├── polarizacion_comparacion.py
-│   ├── polarizacion_vs_ruido.py
+│   ├── config.py                    # Constantes compartidas
+│   ├── utils.py                     # MSER, carga de archivos, utilidades
+│   ├── run.py                       # Barrido de simulaciones
+│   ├── plot/
+│   │   ├── polarizacion_vs_tiempo.py    # (a) va(t)
+│   │   ├── clusters_vs_tiempo.py        # (d) S(t)
+│   │   ├── polarizacion_vs_eta.py       # (c) <va> ± σ vs η
+│   │   ├── clusters_vs_eta.py           # (d) <S> ± σ vs η
+│   │   ├── polarizacion_vs_S.py         # (e) va vs S scatter
+│   │   ├── comparacion_ruido.py         # Comparación 3 ruidos
+│   │   └── animacion.py                 # Animación de partículas
 │   └── requirements.txt
 ├── build/
 │   ├── simulador
-│   └── resultados/          # Series de polarización por experimento
+│   └── resultados/          # CSVs de experimentos
 └── docs/
     └── TP2_Enunciado.md
 ```
 
-## Output
+## Formatos de CSV
 
-El archivo `evolucion_dinamica.csv` tiene las columnas:
-
+**Trayectoria completa** (`evolucion_dinamica.csv`):
 ```
-Time, ID, X, Y, Angle, Radius
+Time,ID,X,Y,Angle,Radius
 ```
 
-Cada fila representa el estado de una partícula en un instante de tiempo.
-
-Los CSV de experimento (`build/resultados/*.csv`) tienen en cambio un único valor por paso:
-
+**Serie temporal compacta** (`build/resultados/ruido_eta*.csv`):
 ```
-Time, Polarization
+Time,Polarization,S
 ```

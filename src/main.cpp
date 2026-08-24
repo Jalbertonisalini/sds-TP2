@@ -57,20 +57,20 @@ void imprimir_uso(const char* programa) {
               << "  --iterations <n>    Cantidad de pasos (default 10000)\n"
               << "  --model <modelo>    standard | voter (default voter)\n"
               << "  --seed <semilla>    Semilla de aleatoriedad (default 42)\n"
-              << "  --output <ruta>     CSV compacto Time,Polarization (un valor por paso)\n"
+              << "  --output <ruta>     CSV compacto Time,Polarization,S (un valor por paso)\n"
               << "  -h, --help          Mostrar esta ayuda\n";
 }
 
 int main(int argc, char* argv[]) {
     SimulationConfig config;
-    config.L = 10.0;           // Caja cuadrada[cite: 1]
-    config.density = 4;      // Seleccionamos rho = 4 para esta corrida[cite: 1]
+    config.L = 10.0;
+    config.density = 4;
     config.rc = 1.0;
     config.r_max = 0.0;        // Partículas off-lattice puntuales
     config.eta = 0.5;          // Ruido de prueba
     config.velocity = 0.03;
-    config.iterations = 10000;
-    config.model = ModelType::Voter; // Cambiar a Voter para el otro escenario[cite: 1]
+    config.iterations = 20000;
+    config.model = ModelType::Standard; // Cambiar a Voter para el otro escenario[cite: 1]
 
     bool allow_overlap = false; // Flag requerido
     unsigned int seed = 42;
@@ -130,13 +130,13 @@ int main(int argc, char* argv[]) {
     std::cout << "Iniciando simulacion...\n";
 
     if (!output_path.empty()) {
-        // Modo experimento: serie temporal compacta de polarización
-        OutputWriter writer(output_path, "Time,Polarization");
-        writer.save_scalar(0, engine.polarizacion());
+        // Modo experimento: serie temporal compacta de polarización y clusters
+        OutputWriter writer(output_path, "Time,Polarization,S");
+        writer.save_scalar_2(0, engine.polarizacion(), engine.compute_largest_cluster_fraction());
 
         for (int t = 1; t <= config.iterations; ++t) {
             engine.step();
-            writer.save_scalar(t, engine.polarizacion());
+            writer.save_scalar_2(t, engine.polarizacion(), engine.largest_cluster_fraction());
 
             if (t % 100 == 0) {
                 std::cout << "Progreso: Paso " << t << " / " << config.iterations << "\n";
@@ -144,7 +144,8 @@ int main(int argc, char* argv[]) {
         }
 
         std::cout << "Simulacion finalizada. Polarizacion final: "
-                  << engine.polarizacion() << "\n";
+                  << engine.polarizacion() << ", Cluster mas grande: "
+                  << engine.largest_cluster_fraction() << "\n";
         std::cout << "Serie temporal guardada en " << output_path << "\n";
     } else {
         // Modo original: volcado completo de trayectorias

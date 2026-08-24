@@ -21,8 +21,8 @@ public:
     // Volcar el estado de un instante de tiempo t
     void save_step(int time_step, const std::vector<Particle>& particles);
 
-    // Volcar un valor escalar del instante t (serie temporal)
-    void save_scalar(int time_step, double value);
+    // Volcar dos valores escalares del instante t (serie temporal)
+    void save_scalar_2(int time_step, double v1, double v2);
 
     // Métodos estáticos (opcionales, para fotos estáticas o debug)
     static void save_positions(const std::string& filename, const std::vector<Particle>& particles);

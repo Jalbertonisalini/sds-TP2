@@ -1,6 +1,7 @@
 #include "SimulationEngine.hpp"
 #include <cmath>
 #include <algorithm>
+#include <queue>
 
 SimulationEngine::SimulationEngine(const SimulationConfig& cfg, const std::vector<Particle>& initial_state,
                                    unsigned int seed)
@@ -94,4 +95,42 @@ void SimulationEngine::update_voter(std::vector<Particle>& next_state) {
         if (next_state[i].position.y >= config.L) next_state[i].position.y -= config.L;
         if (next_state[i].position.y < 0)         next_state[i].position.y += config.L;
     }
+}
+
+double SimulationEngine::largest_cluster_fraction() const {
+    int N = static_cast<int>(particles.size());
+    std::vector<bool> visited(N, false);
+    int max_cluster = 0;
+
+    for (int i = 0; i < N; ++i) {
+        if (visited[i]) continue;
+
+        int cluster_size = 0;
+        std::queue<int> q;
+        q.push(i);
+        visited[i] = true;
+
+        while (!q.empty()) {
+            int current = q.front();
+            q.pop();
+            cluster_size++;
+
+            auto neighbors = cim.get_neighbors(particles, current);
+            for (int neighbor : neighbors) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+
+        max_cluster = std::max(max_cluster, cluster_size);
+    }
+
+    return static_cast<double>(max_cluster) / static_cast<double>(N);
+}
+
+double SimulationEngine::compute_largest_cluster_fraction() {
+    cim.build(particles);
+    return largest_cluster_fraction();
 }

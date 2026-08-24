@@ -1,22 +1,13 @@
 import subprocess
 import sys
-from pathlib import Path
 
-
-RUTA_RAIZ = Path(__file__).resolve().parent.parent
-RUTA_SIMULADOR = RUTA_RAIZ / "build" / "simulador"
-DIRECTORIO_BASE_RESULTADOS = RUTA_RAIZ / "build" / "resultados"
-
-DENSIDAD = 4
-MODELO = "standard"  # standard | voter
-
-# Definición del barrido: (inicio, fin, paso)
-RANGO_RUIDO = (0.0, 5.0, 0.25)
-PASOS_DEFECTO = 20000
+from config import (
+    SIMULADOR, RESULTADOS, DENSITY_DEFAULT, ETA_DEFAULT,
+    ITERATIONS_DEFAULT, MODEL_DEFAULT, SEED_DEFAULT, RANGO_RUIDO,
+)
 
 
 def valores_del_rango(rango):
-    """Genera la lista de ruidos [inicio, fin] espaciados por paso, sin polvo de flotantes."""
     inicio, fin, paso = rango
     cantidad = int(round((fin - inicio) / paso))
     return [round(inicio + i * paso, 2) for i in range(cantidad + 1)]
@@ -24,14 +15,15 @@ def valores_del_rango(rango):
 
 def imprimir_uso():
     print(
-        "Uso: python correr_ruido.py [valores_eta...] [opciones]\n"
+        "Uso: python run.py [valores_eta...] [opciones]\n\n"
         "Sin argumentos corre el barrido completo definido en RANGO_RUIDO.\n\n"
         "  valores_eta...       Corre sólo esos valores (ej: 0.6 2.2 5.3)\n"
-        "  --rango IN FIN PASO  Usa otro rango de ruidos en vez de RANGO_RUIDO\n"
-        f"  --pasos N            Pasos por corrida (default {PASOS_DEFECTO})\n"
-        "  --modelo MOD         Modelo de interacción: standard | voter (default standard)\n"
-        "  --directorio NOM     Guarda los resultados en build/resultados/NOM/\n"
-        "                       (default: build/resultados/)\n"
+        f"  --density N          Densidad (default {DENSITY_DEFAULT})\n"
+        f"  --rango IN FIN PASO  Rango de ruidos (default {RANGO_RUIDO})\n"
+        f"  --pasos N            Pasos por corrida (default {ITERATIONS_DEFAULT})\n"
+        f"  --modelo MOD         Modelo: standard | voter (default {MODEL_DEFAULT})\n"
+        f"  --seed N             Semilla (default {SEED_DEFAULT})\n"
+        "  --directorio NOM     Subdirectorio en build/resultados/ (default: raíz)\n"
         "  --forzar             Re-corre casos cuyo CSV ya exista\n"
         "  -h, --help           Mostrar esta ayuda"
     )
@@ -40,8 +32,10 @@ def imprimir_uso():
 def parsear_args(argv):
     ruidos = []
     rango = None
-    pasos = PASOS_DEFECTO
-    modelo = MODELO
+    pasos = ITERATIONS_DEFAULT
+    modelo = MODEL_DEFAULT
+    density = DENSITY_DEFAULT
+    seed = SEED_DEFAULT
     directorio = ""
     forzar = False
 
@@ -59,6 +53,12 @@ def parsear_args(argv):
             if argv[i] not in ("standard", "voter"):
                 raise ValueError(f"modelo desconocido: {argv[i]} (usar standard o voter)")
             modelo = argv[i]
+        elif arg == "--density":
+            i += 1
+            density = float(argv[i])
+        elif arg == "--seed":
+            i += 1
+            seed = int(argv[i])
         elif arg == "--directorio":
             i += 1
             directorio = argv[i]
@@ -76,17 +76,18 @@ def parsear_args(argv):
     if not ruidos:
         ruidos = valores_del_rango(rango if rango is not None else RANGO_RUIDO)
 
-    return ruidos, pasos, modelo, directorio, forzar
+    return ruidos, pasos, modelo, density, seed, directorio, forzar
 
 
-def correr_caso(eta, pasos, modelo, directorio_resultados):
+def correr_caso(eta, pasos, modelo, density, seed, directorio_resultados):
     archivo_salida = directorio_resultados / f"ruido_eta{eta}.csv"
     comando = [
-        str(RUTA_SIMULADOR),
+        str(SIMULADOR),
         "--model", modelo,
-        "--density", str(DENSIDAD),
+        "--density", str(density),
         "--eta", str(eta),
         "--iterations", str(pasos),
+        "--seed", str(seed),
         "--output", str(archivo_salida),
     ]
     subprocess.run(comando, check=True)
@@ -94,31 +95,31 @@ def correr_caso(eta, pasos, modelo, directorio_resultados):
 
 
 if __name__ == "__main__":
-    if not RUTA_SIMULADOR.exists():
+    if not SIMULADOR.exists():
         sys.exit(
-            f"Error: No se encontró el simulador en {RUTA_SIMULADOR}.\n"
+            f"Error: No se encontró el simulador en {SIMULADOR}.\n"
             "Compilá primero: mkdir -p build && cd build && cmake .. && make"
         )
 
     try:
-        ruidos, pasos, modelo, directorio, forzar = parsear_args(sys.argv[1:])
+        ruidos, pasos, modelo, density, seed, directorio, forzar = parsear_args(sys.argv[1:])
     except (ValueError, IndexError) as e:
         print(f"Error de argumentos: {e}")
         imprimir_uso()
         sys.exit(1)
 
-    directorio_resultados = DIRECTORIO_BASE_RESULTADOS / directorio
+    directorio_resultados = RESULTADOS / directorio
     directorio_resultados.mkdir(parents=True, exist_ok=True)
 
-    print(f"Barrido de ruido ({modelo}): eta={ruidos} | pasos={pasos} | salida={directorio_resultados}")
+    print(f"Barrido ({modelo}): eta={ruidos} | density={density} | pasos={pasos} | salida={directorio_resultados}")
 
     for eta in ruidos:
         archivo = directorio_resultados / f"ruido_eta{eta}.csv"
         if archivo.exists() and not forzar:
             print(f"[salteado] eta={eta}: ya existe {archivo.name} (--forzar para re-correr)")
             continue
-        print(f"\n=== Caso eta={eta} ===")
-        correr_caso(eta, pasos, modelo, directorio_resultados)
-        print(f"Resultado guardado en {archivo}")
+        print(f"\n=== eta={eta} ===")
+        correr_caso(eta, pasos, modelo, density, seed, directorio_resultados)
+        print(f"Guardado en {archivo}")
 
-    print(f"\nExperimento completo: resultados en {directorio_resultados}")
+    print(f"\nListo. Resultados en {directorio_resultados}")

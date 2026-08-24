@@ -31,4 +31,10 @@ public:
 
     // Polarización instantánea va = |<(cos θ, sin θ)>| sobre las partículas
     double polarizacion() const;
+
+    // Construye el CIM para el estado actual y devuelve la fracción del cluster más grande
+    double compute_largest_cluster_fraction();
+
+    // Devuelve la fracción del cluster más grande (asume CIM ya construido)
+    double largest_cluster_fraction() const;
 };

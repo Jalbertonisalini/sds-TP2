@@ -39,9 +39,9 @@ void OutputWriter::save_step(int time_step, const std::vector<Particle>& particl
     }
 }
 
-// Escritura de un valor escalar por paso temporal
-void OutputWriter::save_scalar(int time_step, double value) {
-    file << time_step << "," << value << "\n";
+// Escritura de dos valores escalares por paso temporal
+void OutputWriter::save_scalar_2(int time_step, double v1, double v2) {
+    file << time_step << "," << v1 << "," << v2 << "\n";
 }
 
 // --- Métodos estáticos auxiliares ---
