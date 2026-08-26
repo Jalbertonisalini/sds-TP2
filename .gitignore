@@ -73,3 +73,20 @@ Testing/
 
 # Gráficos generados por los scripts de análisis
 python/output/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.nav.gz
+*.snm.gz
+*.secstart

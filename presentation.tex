@@ -1,0 +1,445 @@
+\documentclass[aspectratio=43]{beamer}
+
+% --- Toggle para version impresa (PDF) vs presentacion en vivo ---
+% Cambiar \printtrue por \printfalse para version con animaciones embebidas
+\newif\ifpptprint
+\pptprinttrue
+
+% --- Tema: solo colores de Warsaw, headline y footer custom ---
+\usecolortheme{dolphin}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% --- Custom headline: dots + section names ---
+\setbeamertemplate{headline}{%
+  \begin{beamercolorbox}[ht=2.6em,dp=0.1em,leftskip=0pt,rightskip=0pt]{section in head/foot}%
+    \centering
+    \begin{tikzpicture}
+      \pgfmathtruncatemacro{\cf}{\insertframenumber}
+      \def\rad{2.5pt}
+      \def\dgap{0.4}
+      \def\sgap{1.2}
+
+      % --- Grupo 1: Intro (frames 3-5, 3 dots) ---
+      \pgfmathsetmacro{\bx}{0}
+      \foreach \k/\fr in {1/3,2/4,3/5} {
+        \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
+        \ifnum\fr=\cf
+          \fill[white] (\x,0) circle(\rad);
+          \draw[white,line width=1pt] (\x,0) circle(\rad+1.5pt);
+        \else\ifnum\fr<\cf
+          \fill[white] (\x,0) circle(\rad);
+        \else
+          \draw[white,line width=0.5pt] (\x,0) circle(\rad);
+        \fi\fi
+      }
+      \node[white,font=\tiny\bfseries] at ({\bx+0.4},-0.3) {Intro};
+
+      % --- Grupo 2: Implementacion (frames 6-7, 2 dots) ---
+      \pgfmathsetmacro{\bx}{\bx + 2*\dgap + \sgap}
+      \foreach \k/\fr in {1/6,2/7} {
+        \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
+        \ifnum\fr=\cf
+          \fill[white] (\x,0) circle(\rad);
+          \draw[white,line width=1pt] (\x,0) circle(\rad+1.5pt);
+        \else\ifnum\fr<\cf
+          \fill[white] (\x,0) circle(\rad);
+        \else
+          \draw[white,line width=0.5pt] (\x,0) circle(\rad);
+        \fi\fi
+      }
+      \node[white,font=\tiny\bfseries] at ({\bx+0.2},-0.3) {Impl};
+
+      % --- Grupo 3: Simulaciones (frames 8-10, 3 dots) ---
+      \pgfmathsetmacro{\bx}{\bx + 1*\dgap + \sgap}
+      \foreach \k/\fr in {1/8,2/9,3/10} {
+        \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
+        \ifnum\fr=\cf
+          \fill[white] (\x,0) circle(\rad);
+          \draw[white,line width=1pt] (\x,0) circle(\rad+1.5pt);
+        \else\ifnum\fr<\cf
+          \fill[white] (\x,0) circle(\rad);
+        \else
+          \draw[white,line width=0.5pt] (\x,0) circle(\rad);
+        \fi\fi
+      }
+      \node[white,font=\tiny\bfseries] at ({\bx+0.4},-0.3) {Sim};
+
+      % --- Grupo 4: Resultados (frames 11-18, 8 dots) ---
+      \pgfmathsetmacro{\bx}{\bx + 2*\dgap + \sgap}
+      \foreach \k/\fr in {1/11,2/12,3/13,4/14,5/15,6/16,7/17,8/18} {
+        \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
+        \ifnum\fr=\cf
+          \fill[white] (\x,0) circle(\rad);
+          \draw[white,line width=1pt] (\x,0) circle(\rad+1.5pt);
+        \else\ifnum\fr<\cf
+          \fill[white] (\x,0) circle(\rad);
+        \else
+          \draw[white,line width=0.5pt] (\x,0) circle(\rad);
+        \fi\fi
+      }
+      \node[white,font=\tiny\bfseries] at ({\bx+1.4},-0.3) {Res};
+
+      % --- Grupo 5: Conclusiones (frames 19-20, 2 dots) ---
+      \pgfmathsetmacro{\bx}{\bx + 7*\dgap + \sgap}
+      \foreach \k/\fr in {1/19,2/20} {
+        \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
+        \ifnum\fr=\cf
+          \fill[white] (\x,0) circle(\rad);
+          \draw[white,line width=1pt] (\x,0) circle(\rad+1.5pt);
+        \else\ifnum\fr<\cf
+          \fill[white] (\x,0) circle(\rad);
+        \else
+          \draw[white,line width=0.5pt] (\x,0) circle(\rad);
+        \fi\fi
+      }
+      \node[white,font=\tiny\bfseries] at ({\bx+0.2},-0.3) {Conc};
+
+    \end{tikzpicture}
+  \end{beamercolorbox}
+}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{listings}
+\usepackage{hyperref}
+
+% --- Comandos de notacion ---
+\newcommand{\vv}[1]{\boldsymbol{#1}}       % vectores en negrita
+\newcommand{\uu}[1]{\mathrm{#1}}          % unidades en romano
+
+% --- Comando auxiliar para animaciones (print: imagen+link, live: placeholder) ---
+\newcommand{\animacion}[3]{%
+  \ifpptprint
+    \begin{center}
+      \includegraphics[width=0.75\textwidth]{#1}
+      \vspace{0.3em}
+      \small\textbf{[Animacion]} Ver video:
+      \href{#2}{#3}
+    \end{center}
+  \else
+    \begin{center}
+      \Large\textbf{[Animacion embebida]}
+    \end{center}
+  \fi
+}
+
+% --- Metadatos ---
+\title{Automatas Celulares Off-Lattice}
+\subtitle{Simulacion de bandadas de agentes autopropulsados}
+\author{Miembro 1 \and Miembro 2 \and Miembro 3}
+\institute{Simulacion de Sistemas --- ITBA}
+\date{Septiembre 2026}
+
+% ============================================================
+\begin{document}
+
+% --- Titulo ---
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% --- Indice ---
+\begin{frame}{Contenidos}
+  \tableofcontents
+\end{frame}
+
+% ============================================================
+\section{Introduccion / Sistema Real}
+% ============================================================
+
+\begin{frame}{Introduccion}
+  \begin{itemize}
+    \item Sistema de particulas autopropulsadas con interaccion local
+    \item Transicion de fase: desorden $\leftrightarrow$ flocking
+      segun ruido $\eta$
+    \item Dos modelos: Vicsek (promedio) y Votante (copia)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Modelo Matematico}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \textbf{Estandar (Vicsek):}
+    \[
+      \bar{\theta}_i = \operatorname{atan2}\!\Big(
+        \sum_{j \in \mathcal{N}_i} \sin\theta_j,\;
+        \sum_{j \in \mathcal{N}_i} \cos\theta_j \Big)
+    \]
+    \vspace{0.3em}
+    \footnotesize
+    $\mathcal{N}_i$ incluye a la particula $i$ y sus vecinos
+    dentro de $r_c$.
+
+    \column{0.4\textwidth}
+    \textbf{Votante:}
+    \[
+      \bar{\theta}_i = \theta_j, \quad j \in \mathcal{N}_i
+    \]
+    \vspace{0.5em}
+    \small
+    Copia direccion de un vecino al azar.
+
+    \vspace{1em}
+    \textbf{Ambos modelos:}
+    \[
+      \theta_i(t\!+\!1) = \bar{\theta}_i + \eta\,\xi
+    \]
+    \[
+      \vv{r}_i(t\!+\!1) = \vv{r}_i(t) + v\,
+      \begin{pmatrix}\cos\theta_i(t\!+\!1) \\
+                     \sin\theta_i(t\!+\!1)\end{pmatrix}
+    \]
+    \footnotesize
+    $\xi \sim \mathcal{U}[-1/2,\,1/2]$,
+    contornos periodicos.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Observables}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \textbf{Polarizacion}
+    \[
+      v_a(t) = \left|
+        \frac{1}{N} \sum_{i=1}^{N}
+        \begin{pmatrix}
+          \cos\theta_i(t) \\
+          \sin\theta_i(t)
+        \end{pmatrix}
+      \right|
+    \]
+    Mide el grado de alineacion global.\\
+    $v_a = 1$: totalmente alineado.\\
+    $v_a \approx 0$: desordenado.
+
+    \column{0.5\textwidth}
+    \textbf{Fraccion del cluster mas grande}
+    \[
+      S(t) = \frac{N_{\text{cluster}}}{N}
+    \]
+    Un cluster es un conjunto de particulas donde todo par
+    esta conectado por una cadena de vecinos dentro de $r_c$.\\
+    Se calcula con BFS sobre el grafo de vecindad.
+  \end{columns}
+\end{frame}
+
+% ============================================================
+\section{Implementacion}
+% ============================================================
+
+\begin{frame}{Arquitectura del codigo}
+  \begin{center}
+    \begin{tikzpicture}[
+        box/.style={draw, rounded corners, minimum width=3cm,
+                     minimum height=0.75cm, font=\small},
+        arr/.style={->, thick}
+      ]
+      \node[box] (cfg) at (0,3.0) {main.cpp};
+      \node[box] (eng) at (0,1.8) {SimulationEngine};
+      \node[box] (cim) at (0,0.6) {CellIndexMethod};
+      \node[box] (out) at (0,-0.6) {OutputWriter};
+      \node[box, fill=gray!10] (py) at (0,-1.8) {Python / plots};
+
+      \draw[arr] (cfg) -- (eng);
+      \draw[arr] (eng) -- (cim);
+      \draw[arr] (eng) -- (out);
+      \draw[arr] (out) -- (py);
+
+      \node[right, font=\footnotesize, text=gray] at (1.7,3.0) {args, seed};
+      \node[right, font=\footnotesize, text=gray] at (1.7,1.8) {step, obs};
+      \node[right, font=\footnotesize, text=gray] at (1.7,0.6) {vecinos};
+      \node[right, font=\footnotesize, text=gray] at (1.7,-0.6) {CSV};
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Metodo del Indice Celular (CIM)}
+  \begin{itemize}
+    \item Grilla $M \times M$, celdas de tamano $\geq r_c$
+    \item Listas enlazadas con arreglos planos (cache-friendly)
+    \item Solo se inspeccionan 9 celdas vecinas
+      $\Rightarrow$ busqueda en $\mathcal{O}(N)$
+    \item Contornos periodicos con envoltura modular
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+\section{Simulaciones}
+% ============================================================
+
+\begin{frame}{Geometria del sistema}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item Caja cuadrada $L \times L$, $L = 10\;\uu{m}$
+      \item Condiciones de contorno periodicas (topologia toroidal)
+      \item Radio de interaccion $r_c = 1\;\uu{m}$
+      \item Velocidad constante $v = 0.03\;\uu{m/s}$
+      \item Paso temporal: $\Delta t = 1\;\uu{s}$
+    \end{itemize}
+
+    \column{0.45\textwidth}
+    \begin{center}
+    \begin{tikzpicture}[scale=1.2]
+      \draw[thick] (0,0) rectangle (4,4);
+      \foreach \x/\y/\a in {0.8/2.1/30, 2.2/3.5/120, 1.5/0.8/200,
+                             3.1/2.7/80, 0.5/3.2/310, 3.6/1.0/170} {
+        \draw[->, thick, blue!70!black]
+          (\x,\y) -- ++({cos(\a)*0.35},{sin(\a)*0.35});
+        \fill[blue!40] (\x,\y) circle (2pt);
+      }
+      \node[below] at (2,-0.15) {\small $L$};
+      \node[left]  at (-0.15,2) {\rotatebox{90}{\small $L$}};
+    \end{tikzpicture}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Parametros del estudio}
+  \begin{table}
+    \centering\small
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+      Parametro & Valores & Descripcion \\
+      \midrule
+      $\eta$ (ruido) & $0,\; 0.25,\; \ldots,\; 5.0$ & Variable independiente \\
+      $\rho$ (densidad) & $2,\; 4,\; 8\;\uu{m^{-2}}$ & Requerida por enunciado \\
+      Modelo & Estandar, Votante & Regla de interaccion \\
+      $L$ & $10\;\uu{m}$ & Fijo \\
+      $r_c$ & $1\;\uu{m}$ & Fijo \\
+      $v$ & $0.03\;\uu{m/s}$ & Fijo \\
+      Pasos & $20\,000$ & Tiempo de simulacion por corrida \\
+      $N$ & $\rho \times L^2$ & $40$, $400$ o $800$ \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \vspace{0.3em}
+  \begin{itemize}
+    \item Cada valor de $\eta$ se repite \textbf{M veces}
+      con semillas distintas para estimar barras de error.
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+\section{Resultados}
+% ============================================================
+
+% --- Modelo Estandar: rho = 4 ---
+
+\begin{frame}{Animacion --- Modelo Estandar, $\rho=4$}
+  \animacion{python/output/polarizacion_vs_tiempo.png}%
+            {https://youtu.be/XXXXX}{https://youtu.be/XXXXX}
+\end{frame}
+
+% TODO: duplicar este frame para otros valores de eta y rho
+
+\begin{frame}{Evolucion temporal de la polarizacion --- $\rho=4$, Estandar}
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{python/output/polarizacion_vs_tiempo.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}{$v_a$ vs $\eta$ --- Modelo Estandar, $\rho=4$}
+  \begin{center}
+    \includegraphics[width=0.70\textwidth]{python/output/polarizacion_vs_eta.png}
+  \end{center}
+  \vspace{-0.3em}
+  \begin{itemize}
+    \item Transicion continua: $\eta \approx 1\text{--}3$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Evolucion temporal de $S$ --- $\rho=4$, Estandar}
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{python/output/clusters_vs_tiempo.png}
+  \end{center}
+  \vspace{-0.3em}
+  \begin{itemize}
+    \item Comportamiento similar a la polarizacion.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{$S$ vs $\eta$ --- Modelo Estandar, $\rho=4$}
+  \begin{center}
+    \includegraphics[width=0.70\textwidth]{python/output/clusters_vs_eta.png}
+  \end{center}
+  \vspace{-0.3em}
+  \begin{itemize}
+    \item Transicion co-localizada con la polarizacion.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{$v_a$ vs $S$ --- Modelo Estandar, $\rho=4$}
+  \begin{center}
+    \includegraphics[width=0.65\textwidth]{python/output/polarizacion_vs_S.png}
+  \end{center}
+  \vspace{-0.3em}
+  \begin{itemize}
+    \item Correlacion positiva entre ambos observables.
+  \end{itemize}
+\end{frame}
+
+% TODO: Repetir secciones de Resultados para rho=2 y rho=8
+
+% --- Modelo de Votante ---
+
+\begin{frame}{Animacion --- Modelo Votante, $\rho=4$}
+  \animacion{python/output/polarizacion_vs_tiempo.png}%   TODO: reemplazar con animacion del votante
+            {https://youtu.be/XXXXX}{https://youtu.be/XXXXX}
+\end{frame}
+
+% TODO: Series temporales, curvas vs eta, clusters, y va vs S
+%       para el modelo de votante en rho = 2, 4, 8
+
+\begin{frame}{Comparacion: Estandar vs Votante --- $\rho=4$}
+  \begin{center}
+    % TODO: superponer curvas de ambos modelos en una misma figura
+    \includegraphics[width=0.70\textwidth]{python/output/polarizacion_vs_eta.png}
+  \end{center}
+  \vspace{-0.3em}
+  \begin{itemize}
+    \item Comparar la ubicacion y la pendiente de la transicion
+      entre ambos modelos.
+    \item % TODO: describir hallazgos de la comparacion
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+\section{Conclusiones}
+% ============================================================
+
+\begin{frame}{Conclusiones}
+  \begin{enumerate}
+    \item El modelo de Vicsek presenta una transicion de fase continua
+      desde un estado alineado ($v_a \approx 1$) a uno
+      desordenado al aumentar el ruido $\eta$.
+    \item La fraccion del cluster mas grande $S$ presenta
+      un comportamiento correlacionado con la polarizacion.
+    \item % TODO: comparacion Estandar vs Votante
+    \item % TODO: efecto de la densidad
+  \end{enumerate}
+\end{frame}
+
+% --- Cierre ---
+\begin{frame}
+  \begin{center}
+    \vfill
+    {\Huge\bfseries Muchas Gracias}\\[1em]
+    {\large Simulacion de Sistemas --- ITBA}\\[0.5em]
+    {\large Septiembre 2026}
+    \vfill
+  \end{center}
+\end{frame}
+
+% ============================================================
+\end{document}
