@@ -128,25 +128,69 @@ python plot/comparacion_ruido.py 0.6 2.2 5.3
 
 **Evolución temporal con 3 ruidos (punto b)** — `plot/new/`:
 
-Los scripts nuevos viven en `python/plot/new/` para que puedas revisarlos y luego borrar los viejos. `evolucion_va_ruidos.py` superpone las curvas `va(t)` de 3 ruidos en una sola figura, marcando el inicio del estado estacionario con una línea vertical por curva (criterio por inspección visual, sin método matemático). Sigue el formato de GuiaPresentaciones (sin título dentro de la figura, ejes en palabras, fuente ≥ 20).
+Los scripts nuevos viven en `python/plot/new/` para que puedas revisarlos y luego borrar los viejos. `evolucion_va_ruidos.py` superpone las curvas `va(t)` de 3 ruidos en una sola figura, marcando el inicio del estado estacionario con una línea vertical por curva. Sigue el formato de GuiaPresentaciones (sin título dentro de la figura, ejes en palabras, fuente ≥ 20).
 
 ```bash
 cd python
-python plot/new/evolucion_va_ruidos.py                 # defaults estándar: 0.5:4000 1.5:5000 3.5:0
+python plot/new/evolucion_va_ruidos.py                                            # estándar (default) → standard/rho4
+python plot/new/evolucion_va_ruidos.py --directorio voter/rho4                    # modelo votante (se deduce de la ruta)
 ```
 
-Los `t_inicio` (instante donde comienza el estacionario) se pueden pasar manualmente por argumento. Cada `eta:tinicio` agrega una curva y su línea vertical:
+Los `t_inicio` (instante donde comienza el estacionario) salen de `plot/new/tinicios.json` según modelo+densidad+η. Se pueden pasar manualmente por argumento para sobrescribirlos puntualmente (`eta:tinicio`):
 
 ```bash
-# Valores propios (p. ej. para el modelo votante, con su propio directorio)
-python plot/new/evolucion_va_ruidos.py 0.5:3000 1.5:4000 3.5:500 --directorio voter --salida evolucion_va_voter.png
+python plot/new/evolucion_va_ruidos.py --directorio voter/rho4 0.05:1500 0.1:2000 0.5:0 --salida evolucion_va_voter.png
 ```
 
-| Opción | Descripción |
+**Polarización media vs ruido (punto c)** — `plot/new/`:
+
+`polarizacion_vs_eta.py` grafica `⟨va⟩ ± std` en función del ruido para un (o varios) directorios/densidades. La media y el desvío se calculan **desde** `t_inicio` (de `tinicios.json`), igual criterio que en (b) — sin métodos matemáticos. La leyenda muestra la **densidad** (`ρ = 2/4/8`). Sigue el formato de la guía (error bars + marcadores, ejes en palabras, fuente ≥ 20).
+
+```bash
+# 3 densidades superpuestas (una curva por densidad) para Vicsek y voter
+python plot/new/polarizacion_vs_eta.py --directorio standard/rho2 --directorio standard/rho4 --directorio standard/rho8
+python plot/new/polarizacion_vs_eta.py --directorio voter/rho2 --directorio voter/rho4 --directorio voter/rho8
+python plot/new/polarizacion_vs_eta.py                                            # default standard/rho4
+```
+
+| Opción (b y c) | Descripción |
 |--------|-------------|
-| `eta:tinicio` | Ruido y tiempo de inicio del estacionario (repetible; default `0.5:4000 1.5:5000 3.5:0`) |
-| `--directorio NOM` | Subdirectorio en `build/resultados/` (ej: `voter`) |
+| `--modelo MOD` | `standard` \| `voter`. **Opcional**: se deduce automáticamente del prefijo del directorio |
+| `--directorio NOM` | Subdirectorio en `build/resultados/` (ej: `standard/rho4`, `voter/rho8`); repetible en c) |
 | `--salida ARCHIVO.png` | Archivo de salida |
+| `eta:tinicio` (solo b) | Sobrescribe el t_inicio de un ruido puntual |
+
+**Config de t_inicio (`plot/new/tinicios.json`):**
+
+Define dónde comienza el estado estacionario (por inspección visual) por **modelo + densidad + η**. Es la única fuente de verdad para b) y c): no hay que tocar código al cambiar de modelo/densidad, solo este archivo.
+
+```json
+{
+  "standard": { "b": [0.5, 1.5, 3.5],
+                "2": { "0.5": 0, ... }, "4": { "0.5": 0, ... }, "8": { "0.5": 0, ... } },
+  "voter":    { "b": [0.05, 0.1, 0.5],
+                "2": { "0.05": 0, ... }, "4": { "0.05": 0, ... }, "8": { "0.05": 0, ... } }
+}
+```
+- `b`: lista de ruidos representativos del punto b).
+- clave `"<densidad>"` (ej. `"4"`): tabla `{eta: t_inicio}` para ese modelo y densidad.
+- Un η que falte en la tabla usa `t_inicio = 0`.
+
+**Generar los datos (simulaciones)** — organización por modelo → densidad. `run.py` genera el barrido en `build/resultados/<modelo>/rho<densidad>/`:
+
+```bash
+cd python
+# Vicsek, 3 densidades (ruido 0 → 5)
+python run.py --rango 0 5 0.25 --density 2 --directorio standard/rho2 --modelo standard
+python run.py --rango 0 5 0.25 --density 4 --directorio standard/rho4 --modelo standard
+python run.py --rango 0 5 0.25 --density 8 --directorio standard/rho8 --modelo standard
+# Voter, 3 densidades (ruido 0 → 1, transición del votante a η bajos)
+python run.py --rango 0 1 0.05 --density 2 --directorio voter/rho2 --modelo voter
+python run.py --rango 0 1 0.05 --density 4 --directorio voter/rho4 --modelo voter
+python run.py --rango 0 1 0.05 --density 8 --directorio voter/rho8 --modelo voter
+```
+
+> Nota: las densidades altas (ρ=8, N=800 partículas) tardan más por corrida.
 
 **Animación** (requiere CSV de trayectoria completa):
 

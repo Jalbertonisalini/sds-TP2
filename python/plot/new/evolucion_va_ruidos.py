@@ -9,16 +9,9 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config import RESULTADOS, OUTPUT_DIR
 
+from config_util import (t_inicio_para, densidad_de_directorio, cargar_tinicios,
+                         etas_b_para, densidades_de_modelo, modelo_de_directorio)
 
-# (eta, t_inicio) por defecto para el modelo estándar.
-# t_inicio se determina por inspección visual (sin método matemático):
-# es el instante en que la curva deja de tender y fluctúa alrededor de
-# un valor constante.
-DEFAULT_CASOS = [
-    (0.5, 4000),
-    (2.0, 5000),
-    (5.0, 0),
-]
 
 FUENTE = 20
 TAM_FIG = (13, 6)
@@ -57,20 +50,21 @@ def graficar(casos, archivo_salida=None):
 def imprimir_uso():
     print(
         "Uso: python plot/new/evolucion_va_ruidos.py [eta:tinicio ...] [opciones]\n"
-        "Sin argumentos usa los defaults (standard): "
-        + " ".join(f"{eta}:{tin}" for eta, tin in DEFAULT_CASOS)
-        + "\n\n"
-        "  eta:tinicio     Ruido eta y tiempo de inicio del estacionario (repetible).\n"
-        "                  t_inicio se fija por inspección visual: cuando la curva\n"
-        "                  deja de tender y fluctúa alrededor de un valor constante.\n"
-        "  --directorio NOM  Subdirectorio en build/resultados (default: raíz)\n"
+        "Sin eta:tinicio usa las de tinicios.json para el modelo/densidad.\n\n"
+        "  eta:tinicio     Override puntual: ruido y tiempo de inicio del estacionario\n"
+        "                  (repetible). t_inicio se fija por inspeccion visual.\n"
+        "  --modelo MOD    standard | voter (default standard)\n"
+        "  --directorio NOM  Subdirectorio en build/resultados, ej: standard/rho4, voter/rho4\n"
+        "                  (default <modelo>/rho4)\n"
         "  --salida ARCHIVO.png  Archivo de salida\n"
         "  -h, --help       Mostrar esta ayuda"
     )
 
 
 def parsear_args(argv):
-    casos = []
+    overrides = []
+    modelo = "standard"
+    modelo_dado = False
     directorio = ""
     salida = None
 
@@ -80,6 +74,10 @@ def parsear_args(argv):
         if arg in ("-h", "--help"):
             imprimir_uso()
             sys.exit(0)
+        elif arg == "--modelo":
+            i += 1
+            modelo = argv[i]
+            modelo_dado = True
         elif arg == "--directorio":
             i += 1
             directorio = argv[i]
@@ -90,13 +88,30 @@ def parsear_args(argv):
             raise ValueError(f"opción desconocida: {arg}")
         elif ":" in arg:
             eta_str, tin_str = arg.split(":")
-            casos.append((float(eta_str), int(tin_str)))
+            overrides.append((float(eta_str), int(tin_str)))
         else:
-            casos.append((float(arg), 0))
+            raise ValueError(f"formato invalido: {arg} (usar eta:tinicio)")
         i += 1
 
-    if not casos:
-        casos = list(DEFAULT_CASOS)
+    if not modelo_dado and directorio:
+        derivado = modelo_de_directorio(directorio)
+        if derivado:
+            modelo = derivado
+
+    densidad = densidad_de_directorio(directorio) if directorio else None
+    tinicios = cargar_tinicios()
+
+    if densidad is None:
+        dens = "4" if "4" in tinicios[modelo] else densidades_de_modelo(modelo, tinicios)[0]
+        densidad = dens
+        directorio = f"{modelo}/rho{dens}"
+
+    if overrides:
+        casos = overrides
+    else:
+        casos = []
+        for eta in etas_b_para(modelo, tinicios):
+            casos.append((eta, t_inicio_para(modelo, densidad, eta, tinicios)))
 
     return casos, directorio, salida
 
@@ -105,7 +120,7 @@ if __name__ == "__main__":
     global RESULTADOS
     try:
         casos, directorio, salida = parsear_args(sys.argv[1:])
-    except (ValueError, IndexError) as e:
+    except (ValueError, IndexError, KeyError) as e:
         print(f"Error de argumentos: {e}")
         imprimir_uso()
         sys.exit(1)
