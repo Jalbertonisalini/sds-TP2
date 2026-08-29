@@ -160,6 +160,7 @@ python plot/new/polarizacion_vs_eta.py                                          
 | `--salida ARCHIVO.png` | Archivo de salida |
 | `eta:tinicio` (solo b) | Sobrescribe el t_inicio de un ruido puntual |
 | `--eta VALOR` (solo d-1) | Ruido de la curva S(t) (default: primer `b` del modelo) |
+| `--etas V1 ...` (solo e) | Ruidos representativos de va-vs-S (default: lista `e` de tinicios.json) |
 
 **Clusters (punto d)** — `plot/new/`:
 
@@ -173,19 +174,32 @@ python plot/new/clusters_vs_eta.py --directorio standard/rho2 --directorio stand
 python plot/new/clusters_vs_eta.py --directorio voter/rho2 --directorio voter/rho4 --directorio voter/rho8
 ```
 
+**Polarización vs componente gigante (punto e)** — `plot/new/`:
+
+`polarizacion_vs_S.py` grafica `⟨va⟩ vs ⟨S⟩` con **error bars en ambos ejes** (σ_S en x, σ_va en y), desde la ventana estacionaria. Solo usa **algunos ruidos representativos** (lista `"e"` de `tinicios.json`, sobrescribible con `--etas`), una serie por densidad. Sigue la guía (sin título, ejes en palabras, fuente ≥ 20, error bars + marcadores).
+
+```bash
+# Bajas (obligatorias) — donde va y S varían juntos
+python plot/new/polarizacion_vs_S.py --directorio standard/rho0.318 --directorio standard/rho0.159 --directorio standard/rho0.106
+python plot/new/polarizacion_vs_S.py --directorio voter/rho0.318 --directorio voter/rho0.159 --directorio voter/rho0.106
+# Densidad alta + una baja
+python plot/new/polarizacion_vs_S.py --directorio standard/rho8 --directorio standard/rho4 --directorio standard/rho0.318 --directorio standard/rho0.106
+```
+
 **Config de t_inicio (`plot/new/tinicios.json`):**
 
 Define dónde comienza el estado estacionario (por inspección visual) por **modelo + densidad + η**. Es la única fuente de verdad para b) y c): no hay que tocar código al cambiar de modelo/densidad, solo este archivo.
 
 ```json
 {
-  "standard": { "b": [0.5, 1.5, 3.5],
+  "standard": { "b": [0.5, 1.5, 3.5], "e": [0, 0.5, 1, 2, 3, 4, 5],
                 "2": { "0.5": 0, ... }, "4": { "0.5": 0, ... }, "8": { "0.5": 0, ... } },
-  "voter":    { "b": [0.05, 0.1, 0.5],
+  "voter":    { "b": [0.05, 0.1, 0.5], "e": [0, 0.05, 0.2, 0.5, 0.8, 1],
                 "2": { "0.05": 0, ... }, "4": { "0.05": 0, ... }, "8": { "0.05": 0, ... } }
 }
 ```
 - `b`: lista de ruidos representativos del punto b).
+- `e`: lista de ruidos representativos (pocos puntos) del punto e).
 - clave `"<densidad>"` (ej. `"4"`): tabla `{eta: t_inicio}` para ese modelo y densidad.
 - Un η que falte en la tabla usa `t_inicio = 0`.
 

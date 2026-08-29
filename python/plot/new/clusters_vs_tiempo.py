@@ -29,7 +29,7 @@ def graficar(directorios, modelo, eta, archivo_salida=None):
 
     for directorio, color in zip(directorios, colores):
         densidad = densidad_de_directorio(directorio)
-        ruta = RESULTADOS / directorio / f"ruido_eta{eta}.csv"
+        ruta = RESULTADOS / directorio / f"ruido_eta{float(eta)}.csv"
         if not ruta.exists():
             print(f"Error: no existe {ruta}")
             sys.exit(1)

@@ -58,10 +58,10 @@ def modelo_de_directorio(directorio):
 
 
 def densidades_de_modelo(modelo, tinicios=None):
-    """Lista de densidades (excluyendo la clave especial 'b') para un modelo."""
+    """Lista de densidades (excluyendo las claves especiales 'b' y 'e') para un modelo."""
     if tinicios is None:
         tinicios = cargar_tinicios()
-    return [k for k in tinicios[modelo] if k != "b"]
+    return [k for k in tinicios[modelo] if k not in ("b", "e")]
 
 
 def etas_b_para(modelo, tinicios=None):
@@ -69,6 +69,13 @@ def etas_b_para(modelo, tinicios=None):
     if tinicios is None:
         tinicios = cargar_tinicios()
     return tinicios[modelo]["b"]
+
+
+def etas_e_para(modelo, tinicios=None):
+    """Etas representativos (pocos puntos) del punto e) para un modelo."""
+    if tinicios is None:
+        tinicios = cargar_tinicios()
+    return tinicios[modelo]["e"]
 
 
 def t_inicio_para(modelo, densidad, eta, tinicios=None, default=0):

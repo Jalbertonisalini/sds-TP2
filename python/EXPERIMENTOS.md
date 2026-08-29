@@ -128,6 +128,28 @@ curva por densidad). La media/desvío se calculan desde `t_inicio` (de `tinicios
 
 > La leyenda muestra la densidad real: `ρ = 8`, `ρ = 1/π`, `ρ = 1/(2π)`, `ρ = 1/(3π)`.
 
+## 5) Punto e) — Polarización vs componente gigante (va vs S)
+
+`polarizacion_vs_S.py` grafica **⟨va⟩ vs ⟨S⟩** con **error bars en ambos ejes**
+(x = σ_S, y = σ_va), ambos calculados en la ventana estacionaria (desde `t_inicio`).
+Solo usa **algunos ruidos representativos** (no todo el barrido): la lista `"e"` de
+`tinicios.json` (standard `[0,0.5,1,2,3,4,5]`, voter `[0,0.05,0.2,0.5,0.8,1]`),
+sobrescribible con `--etas`. Una serie por densidad (color), leyenda con la densidad real.
+
+```bash
+# Bajas (obligatorias) — es donde va y S varían juntos y el scatter se extiende
+./.venv/bin/python plot/new/polarizacion_vs_S.py --directorio standard/rho0.318 --directorio standard/rho0.159 --directorio standard/rho0.106
+./.venv/bin/python plot/new/polarizacion_vs_S.py --directorio voter/rho0.318 --directorio voter/rho0.159 --directorio voter/rho0.106
+# Densidad alta + bajas de una
+./.venv/bin/python plot/new/polarizacion_vs_S.py --directorio standard/rho8 --directorio standard/rho4 --directorio standard/rho0.318 --directorio standard/rho0.106
+# Ruidos representativos a mano
+./.venv/bin/python plot/new/polarizacion_vs_S.py --directorio standard/rho0.318 --etas 0 1 2 3 4 5
+./.venv/bin/python plot/new/polarizacion_vs_S.py          # default standard/rho4
+```
+
+> A densidades altas (ρ=4/8) S≈1 para todo η → los puntos se agrupan en vertical
+> (hay componente gigante casi siempre); en las bajas va y S caen juntos con η.
+
 ## Opciones comunes
 
 | Opción | Descripción |
@@ -137,6 +159,7 @@ curva por densidad). La media/desvío se calculan desde `t_inicio` (de `tinicios
 | `--salida ARCHIVO.png` | Nombre/path del PNG (sin path → `python/output/`) |
 | `eta:tinicio` (solo b) | Sobrescribe el t_inicio de un ruido puntual |
 | `--eta VALOR` (solo d-1) | Ruido de la curva S(t) (default: primer `b` del modelo) |
+| `--etas V1 V2 ...` (solo e) | Ruidos representativos de va-vs-S (default: lista `e` de tinicios.json) |
 
 ## Salida de los gráficos
 
