@@ -159,6 +159,19 @@ python plot/new/polarizacion_vs_eta.py                                          
 | `--directorio NOM` | Subdirectorio en `build/resultados/` (ej: `standard/rho4`, `voter/rho8`); repetible en c) |
 | `--salida ARCHIVO.png` | Archivo de salida |
 | `eta:tinicio` (solo b) | Sobrescribe el t_inicio de un ruido puntual |
+| `--eta VALOR` (solo d-1) | Ruido de la curva S(t) (default: primer `b` del modelo) |
+
+**Clusters (punto d)** — `plot/new/`:
+
+El observable **S** (fracción de partículas en el cluster más grande) ya está en los CSVs (`Time,Polarization,S`); no hace falta simular de nuevo. `clusters_vs_tiempo.py` (d-1) grafica `S(t)` con una curva por `--directorio` — superponés la densidad alta (S≈1 siempre) con las bajas (1/π...) obligatorias. `clusters_vs_eta.py` (d-2) grafica `⟨S⟩ ± std` vs η (una curva por densidad, repetible), con el mismo criterio de estacionario que (c). Mismo formato de guía (sin título, ejes en palabras, fuente ≥ 20, error bars + marcadores).
+
+```bash
+# d-1: evolución S(t) — densidad alta + bajas
+python plot/new/clusters_vs_tiempo.py --directorio standard/rho8 --directorio standard/rho0.318 --eta 0.5
+# d-2: ⟨S⟩ ± std vs η — 3 densidades (o cualquier combinación)
+python plot/new/clusters_vs_eta.py --directorio standard/rho2 --directorio standard/rho4 --directorio standard/rho8
+python plot/new/clusters_vs_eta.py --directorio voter/rho2 --directorio voter/rho4 --directorio voter/rho8
+```
 
 **Config de t_inicio (`plot/new/tinicios.json`):**
 

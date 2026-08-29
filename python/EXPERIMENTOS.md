@@ -93,6 +93,41 @@ Grafica una curva por `--directorio`. La leyenda muestra la **densidad** real (`
 
 ---
 
+## 4) Punto d) — Clusters (fracción S del cluster más grande)
+
+El observable **S** (fracción de partículas en el cluster más grande, conectividad por rc)
+ya está guardado en cada CSV de simulación (`Time,Polarization,S`) — no hace falta
+simular nada nuevo. Dos scripts en `plot/new/`:
+
+**d-1 — evolución de S(t)** (`clusters_vs_tiempo.py`): una curva S(t) por `--directorio`,
+con línea vertical del inicio del estacionario. Permite superponer una densidad alta
+(S≈1 siempre) con las bajas (1/π ...) que son obligatorias de mostrar.
+
+```bash
+# Alta + una baja (η=0.5)
+./.venv/bin/python plot/new/clusters_vs_tiempo.py --directorio standard/rho8 --directorio standard/rho0.318 --eta 0.5
+# Alta + las 3 bajas
+./.venv/bin/python plot/new/clusters_vs_tiempo.py --directorio standard/rho8 --directorio standard/rho0.318 --directorio standard/rho0.159 --directorio standard/rho0.106 --eta 0.5
+# Voter (modelo se deduce de la ruta), default eta = primer 'b' del modelo
+./.venv/bin/python plot/new/clusters_vs_tiempo.py --directorio voter/rho8 --directorio voter/rho0.318 --eta 0.1
+./.venv/bin/python plot/new/clusters_vs_tiempo.py          # default standard/rho4
+```
+
+**d-2 — ⟨S⟩ ± std vs η** (`clusters_vs_eta.py`): equivalente a c) pero con la columna S.
+`--directorio` repetible → grafícás la combinación de densidades que quieras (una
+curva por densidad). La media/desvío se calculan desde `t_inicio` (de `tinicios.json`).
+
+```bash
+# 3 densidades por modelo
+./.venv/bin/python plot/new/clusters_vs_eta.py --directorio standard/rho2 --directorio standard/rho4 --directorio standard/rho8
+./.venv/bin/python plot/new/clusters_vs_eta.py --directorio voter/rho2 --directorio voter/rho4 --directorio voter/rho8
+# Con las bajas (cualquier combinación)
+./.venv/bin/python plot/new/clusters_vs_eta.py --directorio standard/rho0.318 --directorio standard/rho0.159 --directorio standard/rho0.106
+./.venv/bin/python plot/new/clusters_vs_eta.py          # default standard/rho4
+```
+
+> La leyenda muestra la densidad real: `ρ = 8`, `ρ = 1/π`, `ρ = 1/(2π)`, `ρ = 1/(3π)`.
+
 ## Opciones comunes
 
 | Opción | Descripción |
@@ -101,6 +136,7 @@ Grafica una curva por `--directorio`. La leyenda muestra la **densidad** real (`
 | `--directorio NOM` | Subdirectorio en `build/resultados/` (ej: `standard/rho4`, `voter/rho8`) |
 | `--salida ARCHIVO.png` | Nombre/path del PNG (sin path → `python/output/`) |
 | `eta:tinicio` (solo b) | Sobrescribe el t_inicio de un ruido puntual |
+| `--eta VALOR` (solo d-1) | Ruido de la curva S(t) (default: primer `b` del modelo) |
 
 ## Salida de los gráficos
 
