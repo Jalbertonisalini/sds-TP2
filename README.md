@@ -126,6 +126,28 @@ cd python
 python plot/comparacion_ruido.py 0.6 2.2 5.3
 ```
 
+**Evolución temporal con 3 ruidos (punto b)** — `plot/new/`:
+
+Los scripts nuevos viven en `python/plot/new/` para que puedas revisarlos y luego borrar los viejos. `evolucion_va_ruidos.py` superpone las curvas `va(t)` de 3 ruidos en una sola figura, marcando el inicio del estado estacionario con una línea vertical por curva (criterio por inspección visual, sin método matemático). Sigue el formato de GuiaPresentaciones (sin título dentro de la figura, ejes en palabras, fuente ≥ 20).
+
+```bash
+cd python
+python plot/new/evolucion_va_ruidos.py                 # defaults estándar: 0.5:4000 1.5:5000 3.5:0
+```
+
+Los `t_inicio` (instante donde comienza el estacionario) se pueden pasar manualmente por argumento. Cada `eta:tinicio` agrega una curva y su línea vertical:
+
+```bash
+# Valores propios (p. ej. para el modelo votante, con su propio directorio)
+python plot/new/evolucion_va_ruidos.py 0.5:3000 1.5:4000 3.5:500 --directorio voter --salida evolucion_va_voter.png
+```
+
+| Opción | Descripción |
+|--------|-------------|
+| `eta:tinicio` | Ruido y tiempo de inicio del estacionario (repetible; default `0.5:4000 1.5:5000 3.5:0`) |
+| `--directorio NOM` | Subdirectorio en `build/resultados/` (ej: `voter`) |
+| `--salida ARCHIVO.png` | Archivo de salida |
+
 **Animación** (requiere CSV de trayectoria completa):
 
 ```bash
