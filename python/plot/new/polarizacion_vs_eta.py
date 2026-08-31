@@ -45,6 +45,17 @@ def resumir_directorio(directorio, modelo):
     return pd.DataFrame(filas)
 
 
+def clamp_err(centers, errs, lo=0.0, hi=1.0):
+    """Recorta barras de error simétricas al dominio físico [lo, hi] (fracciones).
+    Devuelve (err_inferior, err_superior) asimétricos para que las barras no
+    sobrepasen lo/hi (ej. y > 1 en una fracción, que es imposible)."""
+    lo_err, hi_err = [], []
+    for x, e in zip(centers, errs):
+        lo_err.append(max(0.0, min(e, x - lo)))
+        hi_err.append(max(0.0, min(e, hi - x)))
+    return lo_err, hi_err
+
+
 def graficar(directorios, modelo, archivo_salida=None):
     fig, ax = plt.subplots(figsize=TAM_FIG)
     fig.subplots_adjust(bottom=0.16, left=0.10)
@@ -53,11 +64,19 @@ def graficar(directorios, modelo, archivo_salida=None):
 
     for directorio, color in zip(directorios, colores):
         resumen = resumir_directorio(directorio, modelo)
+        lo_err, hi_err = clamp_err(resumen["va_media"], resumen["va_std"])
         ax.errorbar(
-            resumen["eta"], resumen["va_media"], yerr=resumen["va_std"],
+            resumen["eta"], resumen["va_media"], yerr=[lo_err, hi_err],
             fmt="o-", capsize=3, linewidth=1.2, markersize=5, color=color,
             label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio))}$",
         )
+
+    if modelo == "standard":
+        trans = ax.get_xaxis_transform()
+        for eta_ref in (0.5, 1.5, 2.5, 3.5, 4.5):
+            ax.axvline(eta_ref, color="gray", linestyle=":", linewidth=1, alpha=0.6)
+            ax.text(eta_ref, -0.03, str(eta_ref), transform=trans, ha="center", va="top",
+                    fontsize=FUENTE - 8, color="gray")
 
     ax.set_xlabel("Ruido", fontsize=FUENTE)
     ax.set_ylabel("Va", fontsize=FUENTE)
