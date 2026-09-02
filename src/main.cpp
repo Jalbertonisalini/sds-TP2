@@ -3,6 +3,8 @@
 #include <random>
 #include <cmath>
 #include <string>
+#include <chrono>
+#include <fstream>
 #include "Particle.hpp"
 #include "Config.hpp"
 #include "SimulationEngine.hpp"
@@ -58,6 +60,8 @@ void imprimir_uso(const char* programa) {
               << "  --model <modelo>    standard | voter (default voter)\n"
               << "  --seed <semilla>    Semilla de aleatoriedad (default 42)\n"
               << "  --output <ruta>     CSV compacto Time,Polarization,S (un valor por paso)\n"
+              << "  --cim-timing <ruta> Mide tiempo de CIM (build + vecinos) sobre config. inicial,\n"
+              << "                      agrega una fila a <ruta> (no corre la simulación)\n"
               << "  -h, --help          Mostrar esta ayuda\n";
 }
 
@@ -75,6 +79,7 @@ int main(int argc, char* argv[]) {
     bool allow_overlap = false; // Flag requerido
     unsigned int seed = 42;
     std::string output_path;
+    std::string cim_timing_path;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -111,6 +116,8 @@ int main(int argc, char* argv[]) {
             seed = static_cast<unsigned int>(std::stoul(valor));
         } else if (arg == "--output") {
             output_path = valor;
+        } else if (arg == "--cim-timing") {
+            cim_timing_path = valor;
         } else {
             std::cerr << "Error: opción desconocida '" << arg << "'.\n";
             imprimir_uso(argv[0]);
@@ -126,6 +133,45 @@ int main(int argc, char* argv[]) {
     
     auto initial_state = generate_particles(config, N, allow_overlap, seed);
     SimulationEngine engine(config, initial_state, seed);
+
+    if (!cim_timing_path.empty()) {
+        // Benchmark del CIM sobre la configuración inicial (sin evolucionar la simulación),
+        // mismo esquema de batching que SDS-TP1/source/java/NBenchmark.java, para poder
+        // comparar directo con esos tiempos (ver enunciado g).
+        int batch_size = 100;
+        int samples = (N <= 200 ? 300000 : 3000) / batch_size;
+
+        for (int i = 0; i < samples; ++i) {
+            for (int b = 0; b < batch_size; ++b) engine.run_cim_pass();
+        }
+
+        double mean = 0.0, m2 = 0.0;
+        for (int i = 1; i <= samples; ++i) {
+            auto start = std::chrono::steady_clock::now();
+            for (int b = 0; b < batch_size; ++b) engine.run_cim_pass();
+            double ms = std::chrono::duration<double, std::milli>(
+                            std::chrono::steady_clock::now() - start).count() / batch_size;
+            double delta = ms - mean;
+            mean += delta / i;
+            m2 += delta * (ms - mean);
+        }
+        double stddev = samples > 1 ? std::sqrt(m2 / (samples - 1)) : 0.0;
+
+        bool write_header;
+        {
+            std::ifstream check(cim_timing_path);
+            write_header = !check.good() || check.peek() == std::ifstream::traits_type::eof();
+        }
+        std::ofstream out(cim_timing_path, std::ios::app);
+        if (write_header) out << "regimen,N,L,time_mean_ms,time_std_ms,reps,batch\n";
+        out << "tp2," << N << "," << config.L << "," << mean << "," << stddev << ","
+            << samples << "," << batch_size << "\n";
+
+        std::cout << "CIM: N=" << N << "  tiempo=" << mean << "±" << stddev
+                  << " ms  (batch=" << batch_size << ", muestras=" << samples << ")\n";
+        std::cout << "Guardado en " << cim_timing_path << "\n";
+        return 0;
+    }
 
     std::cout << "Iniciando simulacion...\n";
 

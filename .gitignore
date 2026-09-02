@@ -74,6 +74,15 @@ Testing/
 # Gráficos generados por los scripts de análisis
 python/output/
 
+# Python virtualenvs
+.venv/
+venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
 # LaTeX build artifacts
 *.aux
 *.log

@@ -37,4 +37,8 @@ public:
 
     // Devuelve la fracción del cluster más grande (asume CIM ya construido)
     double largest_cluster_fraction() const;
+
+    // Un pase completo del CIM (build + consulta de vecinos de todas las partículas),
+    // sin timing propio, para benchmarking externo (ver --cim-timing en main.cpp).
+    void run_cim_pass();
 };

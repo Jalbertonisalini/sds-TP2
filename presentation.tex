@@ -80,9 +80,24 @@
       }
       \node[white,font=\tiny\bfseries] at ({\bx+1.4},-0.3) {Res};
 
-      % --- Grupo 5: Conclusiones (frames 19-20, 2 dots) ---
+      % --- Grupo 5: Desempeno/CIM (frame 19, 1 dot) ---
       \pgfmathsetmacro{\bx}{\bx + 7*\dgap + \sgap}
-      \foreach \k/\fr in {1/19,2/20} {
+      \foreach \k/\fr in {1/19} {
+        \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
+        \ifnum\fr=\cf
+          \fill[white] (\x,0) circle(\rad);
+          \draw[white,line width=1pt] (\x,0) circle(\rad+1.5pt);
+        \else\ifnum\fr<\cf
+          \fill[white] (\x,0) circle(\rad);
+        \else
+          \draw[white,line width=0.5pt] (\x,0) circle(\rad);
+        \fi\fi
+      }
+      \node[white,font=\tiny\bfseries] at ({\bx+0.0},-0.3) {CIM};
+
+      % --- Grupo 6: Conclusiones (frames 20-21, 2 dots) ---
+      \pgfmathsetmacro{\bx}{\bx + 1*\dgap + \sgap}
+      \foreach \k/\fr in {1/20,2/21} {
         \pgfmathsetmacro{\x}{\bx + (\k-1)*\dgap}
         \ifnum\fr=\cf
           \fill[white] (\x,0) circle(\rad);
@@ -411,6 +426,30 @@
     \item Comparar la ubicacion y la pendiente de la transicion
       entre ambos modelos.
     \item % TODO: describir hallazgos de la comparacion
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+\section{Desempeno (CIM)}
+% ============================================================
+
+\begin{frame}{Tiempos de ejecucion del CIM --- comparacion con TP1}
+  \begin{center}
+    \includegraphics[width=0.72\textwidth]{entrega/g/g_cim_vs_tp1.png}
+  \end{center}
+  \vspace{-0.3em}
+  \begin{itemize}
+    \item \textbf{TP1}: mismo algoritmo de TP1 (grilla $M\times M$, 4 direcciones
+      vecinas + celda propia, cada par evaluado \textbf{una sola vez}), portado a
+      C++ con arreglos planos reutilizados (sin costo de asignacion de memoria).
+    \item \textbf{TP2}: CIM real de este trabajo (arreglos planos, consulta de
+      vecinos \textbf{por particula} sobre 9 celdas).
+    \item Mismo esquema de medicion que \texttt{NBenchmark.java} (TP1): lotes de
+      100 corridas, miles de muestras, sobre una configuracion estatica de
+      particulas (sin evolucionar la simulacion).
+    \item Cruce cerca de $N\approx 40$: a $N$ chico gana TP2 (menos codigo por
+      corrida); a $N$ grande gana TP1, porque TP2 evalua cada par de particulas
+      \textbf{dos veces} (una desde cada lado) en vez de una sola.
   \end{itemize}
 \end{frame}
 

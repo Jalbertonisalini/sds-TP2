@@ -126,6 +126,99 @@ cd python
 python plot/comparacion_ruido.py 0.6 2.2 5.3
 ```
 
+**Evolución temporal con 3 ruidos (punto b)** — `plot/new/`:
+
+Los scripts nuevos viven en `python/plot/new/` para que puedas revisarlos y luego borrar los viejos. `evolucion_va_ruidos.py` superpone las curvas `va(t)` de 3 ruidos en una sola figura, marcando el inicio del estado estacionario con una línea vertical por curva. Sigue el formato de GuiaPresentaciones (sin título dentro de la figura, ejes en palabras, fuente ≥ 20).
+
+```bash
+cd python
+python plot/new/evolucion_va_ruidos.py                                            # estándar (default) → standard/rho4
+python plot/new/evolucion_va_ruidos.py --directorio voter/rho4                    # modelo votante (se deduce de la ruta)
+```
+
+Los `t_inicio` (instante donde comienza el estacionario) salen de `plot/new/tinicios.json` según modelo+densidad+η. Se pueden pasar manualmente por argumento para sobrescribirlos puntualmente (`eta:tinicio`):
+
+```bash
+python plot/new/evolucion_va_ruidos.py --directorio voter/rho4 0.05:1500 0.1:2000 0.5:0 --salida evolucion_va_voter.png
+```
+
+**Polarización media vs ruido (punto c)** — `plot/new/`:
+
+`polarizacion_vs_eta.py` grafica `⟨va⟩ ± std` en función del ruido para un (o varios) directorios/densidades. La media y el desvío se calculan **desde** `t_inicio` (de `tinicios.json`), igual criterio que en (b) — sin métodos matemáticos. La leyenda muestra la **densidad** (`ρ = 2/4/8`). Sigue el formato de la guía (error bars + marcadores, ejes en palabras, fuente ≥ 20).
+
+```bash
+# 3 densidades superpuestas (una curva por densidad) para Vicsek y voter
+python plot/new/polarizacion_vs_eta.py --directorio standard/rho2 --directorio standard/rho4 --directorio standard/rho8
+python plot/new/polarizacion_vs_eta.py --directorio voter/rho2 --directorio voter/rho4 --directorio voter/rho8
+python plot/new/polarizacion_vs_eta.py                                            # default standard/rho4
+```
+
+| Opción (b y c) | Descripción |
+|--------|-------------|
+| `--modelo MOD` | `standard` \| `voter`. **Opcional**: se deduce automáticamente del prefijo del directorio |
+| `--directorio NOM` | Subdirectorio en `build/resultados/` (ej: `standard/rho4`, `voter/rho8`); repetible en c) |
+| `--salida ARCHIVO.png` | Archivo de salida |
+| `eta:tinicio` (solo b) | Sobrescribe el t_inicio de un ruido puntual |
+| `--eta VALOR` (solo d-1) | Ruido de la curva S(t) (default: primer `b` del modelo) |
+| `--etas V1 ...` (solo e) | Ruidos representativos de va-vs-S (default: lista `e` de tinicios.json) |
+
+**Clusters (punto d)** — `plot/new/`:
+
+El observable **S** (fracción de partículas en el cluster más grande) ya está en los CSVs (`Time,Polarization,S`); no hace falta simular de nuevo. `clusters_vs_tiempo.py` (d-1) grafica `S(t)` con una curva por `--directorio` — superponés la densidad alta (S≈1 siempre) con las bajas (1/π...) obligatorias. `clusters_vs_eta.py` (d-2) grafica `⟨S⟩ ± std` vs η (una curva por densidad, repetible), con el mismo criterio de estacionario que (c). Mismo formato de guía (sin título, ejes en palabras, fuente ≥ 20, error bars + marcadores).
+
+```bash
+# d-1: evolución S(t) — densidad alta + bajas
+python plot/new/clusters_vs_tiempo.py --directorio standard/rho8 --directorio standard/rho0.318 --eta 0.5
+# d-2: ⟨S⟩ ± std vs η — 3 densidades (o cualquier combinación)
+python plot/new/clusters_vs_eta.py --directorio standard/rho2 --directorio standard/rho4 --directorio standard/rho8
+python plot/new/clusters_vs_eta.py --directorio voter/rho2 --directorio voter/rho4 --directorio voter/rho8
+```
+
+**Polarización vs componente gigante (punto e)** — `plot/new/`:
+
+`polarizacion_vs_S.py` grafica `⟨va⟩ vs ⟨S⟩` con **error bars en ambos ejes** (σ_S en x, σ_va en y), desde la ventana estacionaria. Solo usa **algunos ruidos representativos** (lista `"e"` de `tinicios.json`, sobrescribible con `--etas`), una serie por densidad. Sigue la guía (sin título, ejes en palabras, fuente ≥ 20, error bars + marcadores).
+
+```bash
+# Bajas (obligatorias) — donde va y S varían juntos
+python plot/new/polarizacion_vs_S.py --directorio standard/rho0.318 --directorio standard/rho0.159 --directorio standard/rho0.106
+python plot/new/polarizacion_vs_S.py --directorio voter/rho0.318 --directorio voter/rho0.159 --directorio voter/rho0.106
+# Densidad alta + una baja
+python plot/new/polarizacion_vs_S.py --directorio standard/rho8 --directorio standard/rho4 --directorio standard/rho0.318 --directorio standard/rho0.106
+```
+
+**Config de t_inicio (`plot/new/tinicios.json`):**
+
+Define dónde comienza el estado estacionario (por inspección visual) por **modelo + densidad + η**. Es la única fuente de verdad para b) y c): no hay que tocar código al cambiar de modelo/densidad, solo este archivo.
+
+```json
+{
+  "standard": { "b": [0.5, 1.5, 3.5], "e": [0, 0.5, 1, 2, 3, 4, 5],
+                "2": { "0.5": 0, ... }, "4": { "0.5": 0, ... }, "8": { "0.5": 0, ... } },
+  "voter":    { "b": [0.05, 0.1, 0.5], "e": [0, 0.05, 0.2, 0.5, 0.8, 1],
+                "2": { "0.05": 0, ... }, "4": { "0.05": 0, ... }, "8": { "0.05": 0, ... } }
+}
+```
+- `b`: lista de ruidos representativos del punto b).
+- `e`: lista de ruidos representativos (pocos puntos) del punto e).
+- clave `"<densidad>"` (ej. `"4"`): tabla `{eta: t_inicio}` para ese modelo y densidad.
+- Un η que falte en la tabla usa `t_inicio = 0`.
+
+**Generar los datos (simulaciones)** — organización por modelo → densidad. `run.py` genera el barrido en `build/resultados/<modelo>/rho<densidad>/`:
+
+```bash
+cd python
+# Vicsek, 3 densidades (ruido 0 → 5)
+python run.py --rango 0 5 0.25 --density 2 --directorio standard/rho2 --modelo standard
+python run.py --rango 0 5 0.25 --density 4 --directorio standard/rho4 --modelo standard
+python run.py --rango 0 5 0.25 --density 8 --directorio standard/rho8 --modelo standard
+# Voter, 3 densidades (ruido 0 → 1, transición del votante a η bajos)
+python run.py --rango 0 1 0.05 --density 2 --directorio voter/rho2 --modelo voter
+python run.py --rango 0 1 0.05 --density 4 --directorio voter/rho4 --modelo voter
+python run.py --rango 0 1 0.05 --density 8 --directorio voter/rho8 --modelo voter
+```
+
+> Nota: las densidades altas (ρ=8, N=800 partículas) tardan más por corrida.
+
 **Animación** (requiere CSV de trayectoria completa):
 
 ```bash
