@@ -191,24 +191,34 @@ Puntos representativos (no todo el barrido) con **desvío en ambos ejes** (σ en
 
 `g/g_cim_vs_tp1.png` — tiempo de un pase completo del CIM (armar grilla + resolver
 vecinos de todas las partículas, sobre una configuración estática, sin evolucionar la
-simulación) en función de N, dos series:
+simulación) en función de N, comparando el CIM a la misma **cantidad de partículas**
+que el barrido del TP1, dos series.
 
-- **TP1**: algoritmo de `SDS-TP1/source/java/CellIndexMethod.java` (grilla M×M, 4
-  direcciones vecinas + celda propia, cada par evaluado una sola vez) portado a C++ en
-  `cim_tp1_bench/`, con estructura de datos pensada para C++ (arrays planos
-  `head`/`next` reutilizados entre corridas, no `vector<vector<int>>` ni
-  `unordered_set` por llamada). L=20, rc=1, PBC (mismos parámetros que TP1).
-- **TP2**: CIM real de este TP (`src/CellIndexMethod.cpp`, arrays planos, consulta de
-  vecinos por partícula sobre 9 celdas). L=10, rc=1, PBC.
+**Ambas series miden el MISMO kernel compartido** (`cim_tp1_bench/include/
+cell_index_method_shared.hpp`): algoritmo del CIM de `SDS-TP1/source/java/
+CellIndexMethod.java` (grilla M×M, 4 direcciones vecinas + celda propia, cada par
+evaluado una sola vez), con arrays planos `head`/`next` reutilizados entre corridas
+(sin `unordered_set` ni contenedores nuevos por llamada). La única diferencia entre
+las series es la geometría de la caja (L y M):
+
+- **TP1**: L=20, M=13 (barrido original de TP1, Tarea 4.1), rc=1, PBC.
+- **TP2**: L=10, M=10 (óptimo, `floor(L/(rc+2·r_max))`), rc=1, PBC.
 
 Ambas series con el mismo esquema de medición que `NBenchmark.java` (TP1): lotes
 (batch) de 100 corridas por toma de tiempo, muestras adaptativas (3000 lotes si
 N≤200, 30 si N>200), media y desvío sobre esas muestras.
 
+Se comparan a igual N (no a igual densidad): el tiempo del CIM escala con la cantidad
+de partículas, así que a igual densidad en cajas distintas (L=20 vs L=10) TP1 tendría
+4× las partículas para la misma ρ, ocultando el costo real por partícula. La diferencia
+(ambas usan el mismo código) queda entonces explicada solo por la geometría: distinta
+cantidad de celdas (169 vs 100) y distinto tamaño de celda (1.54 vs 1.0), que cambian
+cuántos pares por celda se evalúan para un mismo N.
+
 | Serie | N medidos |
 |-------|-----------|
 | TP1 | 10, 25, 50, 100, 200, 350, 400, 500, 650, 800, 900, 1000 (barrido original de TP1, Tarea 4.1) |
-| TP2 | 10, 15, 31, 200, 400, 800 (densidades 1/(3π), 1/(2π), 1/π, 2, 4, 8) |
+| TP2 | 10, 25, 50, 100, 200, 350, 400, 500, 650, 800, 900, 1000 (los mismos N) |
 
 > El CIM no depende del modelo (standard/voter comparten build + búsqueda de
-> vecinos), así que alcanza con una corrida por densidad.
+> vecinos), así que alcanza con una corrida por N.

@@ -5,9 +5,9 @@
 #include "welford.hpp"
 
 // Utilidades de SDS-TP1/source/java/CellIndexMethod.java (M óptimo, radio máximo)
-// más el harness de benchmark genérico. El algoritmo del CIM en sí vive en
-// cell_index_method_reusable.hpp, pensado en C++ desde el diseño (estructuras
-// reutilizadas entre corridas, no un unordered_set nuevo por llamada).
+// más el harness de benchmark genérico. El kernel del CIM en sí es compartido y
+// layout-agnóstico: vive en cell_index_method_shared.hpp y lo usa tanto el benchmark
+// del TP1 como el --cim-timing del TP2 (ver punto g).
 namespace cim_tp1 {
 
 double max_radius(const std::vector<Particle>& particles);

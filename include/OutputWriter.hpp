@@ -26,5 +26,4 @@ public:
 
     // Métodos estáticos (opcionales, para fotos estáticas o debug)
     static void save_positions(const std::string& filename, const std::vector<Particle>& particles);
-    static void save_neighbors(const std::string& filename, const std::vector<std::vector<int>>& all_neighbors);
 };

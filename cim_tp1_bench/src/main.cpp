@@ -5,14 +5,14 @@
 #include <string>
 #include <vector>
 #include "cell_index_method.hpp"
-#include "cell_index_method_reusable.hpp"
+#include "cell_index_method_shared.hpp"
 #include "particle.hpp"
 #include "welford.hpp"
 
-// Puerto del algoritmo de SDS-TP1/source/java/CellIndexMethod.java (grilla M x M, 4
-// direcciones vecinas + celda propia) a C++, pensado desde el diseño para C++: ver
-// cell_index_method_reusable.hpp (estructuras reutilizadas entre corridas, sin crear
-// un contenedor nuevo por llamada como hacía el Java original).
+// Benchmark del CIM del TP1 (Java) portado a C++. Usa la MISMA implementación del
+// kernel que el --cim-timing del TP2 (cell_index_method_shared.hpp), de modo que la
+// comparación del punto g) mida un kernel byte-por-byte idéntico; solo difiere la
+// geometría de la caja (L y M). Ver cell_index_method_shared.hpp.
 // Uso: cim_bench <N> <L> <rc> <periodic> <regimen> [csv] [forceM1] [static_path] [dynamic_path]
 //
 // Lee los mismos input/static.txt e input/dynamic.txt generados por
@@ -20,6 +20,15 @@
 // de batching que NBenchmark.java, para poder comparar tiempos contra SDS-TP1.
 
 namespace {
+
+// Accessors para el Particle de TP1 (x, y, vx, vy, radius): me permiten alimentar el
+// kernel compartido (layout-agnóstico) con este tipo.
+struct Tp1Accessor {
+    static double px(const Particle& p) { return p.x; }
+    static double py(const Particle& p) { return p.y; }
+    static double pradius(const Particle& p) { return p.radius; }
+    static int pid(const Particle& p) { return p.id; }
+};
 
 std::vector<Particle> read_particles(int N, const std::string& static_path, const std::string& dynamic_path) {
     std::vector<double> radii(N);
@@ -100,8 +109,10 @@ int main(int argc, char* argv[]) {
         samples = (N <= 200 ? 300000 : 3000) / batch_size;
     }
 
-    CellIndexMethodReusable cim;
-    Welford stats = cim_tp1::benchmark([&]() { cim.run(particles, L, M, rc, pbc); }, samples, samples, batch_size);
+    std::vector<std::vector<int>> neighbors;
+    Welford stats = cim_tp1::benchmark(
+        [&]() { shared_build_all_neighbors(particles, L, M, rc, pbc, Tp1Accessor{}, neighbors); },
+        samples, samples, batch_size);
 
     bool write_header = true;
     {

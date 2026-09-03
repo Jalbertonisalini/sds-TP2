@@ -55,17 +55,3 @@ void OutputWriter::save_positions(const std::string& filename, const std::vector
         out_file << p.id << "," << p.position.x << "," << p.position.y << "," << p.radius << "\n";
     }
 }
-
-void OutputWriter::save_neighbors(const std::string& filename, const std::vector<std::vector<int>>& all_neighbors) {
-    std::ofstream out_file(filename);
-    if (!out_file.is_open()) throw std::runtime_error("Error al abrir " + filename);
-    
-    for (size_t i = 0; i < all_neighbors.size(); ++i) {
-        out_file << i << " [";
-        for (size_t j = 0; j < all_neighbors[i].size(); ++j) {
-            out_file << all_neighbors[i][j];
-            if (j < all_neighbors[i].size() - 1) out_file << ", ";
-        }
-        out_file << "]\n";
-    }
-}

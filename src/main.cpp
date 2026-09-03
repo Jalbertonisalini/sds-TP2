@@ -9,6 +9,7 @@
 #include "Config.hpp"
 #include "SimulationEngine.hpp"
 #include "OutputWriter.hpp"
+#include "cell_index_method_shared.hpp"
 
 // Función para generar partículas evitando que nazcan pegadas
 std::vector<Particle> generate_particles(const SimulationConfig& config, int N, bool allow_overlap, unsigned int seed) {
@@ -51,10 +52,22 @@ std::vector<Particle> generate_particles(const SimulationConfig& config, int N, 
     return particles;
 }
 
+// Accessors para el Particle de TP2 (Vec2 position + radius): alimentan el kernel
+// CIM compartido (layout-agnóstico) que usa también el benchmark del TP1, de modo
+// que el --cim-timing del punto g) mide exactamente el mismo código que el TP1.
+struct Tp2Accessor {
+    static double px(const Particle& p) { return p.position.x; }
+    static double py(const Particle& p) { return p.position.y; }
+    static double pradius(const Particle& p) { return p.radius; }
+    static int pid(const Particle& p) { return p.id; }
+};
+
 void imprimir_uso(const char* programa) {
     std::cout << "Uso: " << programa << " [opciones]\n"
               << "Sin opciones corre la configuración por defecto y vuelca la trayectoria completa.\n\n"
               << "  --density <rho>     Densidad de partículas (default 4)\n"
+              << "  --n <N>             Cantidad de partículas (reemplaza density*L*L; sirve para\n"
+              << "                      usar los mismos N que el benchmark del TP1, ver punto g)\n"
               << "  --eta <eta>         Amplitud del ruido (default 0.5)\n"
               << "  --iterations <n>    Cantidad de pasos (default 10000)\n"
               << "  --model <modelo>    standard | voter (default voter)\n"
@@ -78,6 +91,7 @@ int main(int argc, char* argv[]) {
 
     bool allow_overlap = false; // Flag requerido
     unsigned int seed = 42;
+    int N_override = -1;        // Si se pasa --n, se usa en vez de density*L*L
     std::string output_path;
     std::string cim_timing_path;
 
@@ -98,6 +112,8 @@ int main(int argc, char* argv[]) {
 
         if (arg == "--density") {
             config.density = std::stod(valor);
+        } else if (arg == "--n") {
+            N_override = std::stoi(valor);
         } else if (arg == "--eta") {
             config.eta = std::stod(valor);
         } else if (arg == "--iterations") {
@@ -125,7 +141,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    int N = static_cast<int>(config.density * config.L * config.L);
+    int N = N_override >= 0 ? N_override
+                            : static_cast<int>(config.density * config.L * config.L);
     std::cout << "Generando " << N << " particulas (rho=" << config.density
               << ", eta=" << config.eta
               << ", modelo=" << (config.model == ModelType::Standard ? "standard" : "voter")
@@ -135,20 +152,30 @@ int main(int argc, char* argv[]) {
     SimulationEngine engine(config, initial_state, seed);
 
     if (!cim_timing_path.empty()) {
-        // Benchmark del CIM sobre la configuración inicial (sin evolucionar la simulación),
-        // mismo esquema de batching que SDS-TP1/source/java/NBenchmark.java, para poder
-        // comparar directo con esos tiempos (ver enunciado g).
+        // Benchmark del CIM (punto g): usa el MISMO kernel compartido que el TP1
+        // (cell_index_method_shared.hpp, layout-agnóstico) con la geometría de TP2
+        // (L=10, M óptimo = floor(L/(rc+2*r_max))), sin evolucionar la simulación.
+        // Mismo esquema de batching que SDS-TP1/source/java/NBenchmark.java, para
+        // poder comparar directo con esos tiempos.
+        int M = static_cast<int>(std::floor(config.L / (config.rc + 2.0 * config.r_max)));
+        std::vector<std::vector<int>> neighbors;
+
+        auto run_pass = [&]() {
+            shared_build_all_neighbors(initial_state, config.L, M, config.rc, config.periodic,
+                                       Tp2Accessor{}, neighbors);
+        };
+
         int batch_size = 100;
         int samples = (N <= 200 ? 300000 : 3000) / batch_size;
 
         for (int i = 0; i < samples; ++i) {
-            for (int b = 0; b < batch_size; ++b) engine.run_cim_pass();
+            for (int b = 0; b < batch_size; ++b) run_pass();
         }
 
         double mean = 0.0, m2 = 0.0;
         for (int i = 1; i <= samples; ++i) {
             auto start = std::chrono::steady_clock::now();
-            for (int b = 0; b < batch_size; ++b) engine.run_cim_pass();
+            for (int b = 0; b < batch_size; ++b) run_pass();
             double ms = std::chrono::duration<double, std::milli>(
                             std::chrono::steady_clock::now() - start).count() / batch_size;
             double delta = ms - mean;
@@ -163,11 +190,13 @@ int main(int argc, char* argv[]) {
             write_header = !check.good() || check.peek() == std::ifstream::traits_type::eof();
         }
         std::ofstream out(cim_timing_path, std::ios::app);
-        if (write_header) out << "regimen,N,L,time_mean_ms,time_std_ms,reps,batch\n";
-        out << "tp2," << N << "," << config.L << "," << mean << "," << stddev << ","
+        if (write_header) out << "regimen,N,L,M,rho,time_mean_ms,time_std_ms,reps,batch\n";
+        out << "tp2," << N << "," << config.L << "," << M << ","
+            << (N / (config.L * config.L)) << "," << mean << "," << stddev << ","
             << samples << "," << batch_size << "\n";
 
-        std::cout << "CIM: N=" << N << "  tiempo=" << mean << "±" << stddev
+        std::cout << "CIM: N=" << N << "  L=" << config.L << "  M=" << M
+                  << "  tiempo=" << mean << "±" << stddev
                   << " ms  (batch=" << batch_size << ", muestras=" << samples << ")\n";
         std::cout << "Guardado en " << cim_timing_path << "\n";
         return 0;
