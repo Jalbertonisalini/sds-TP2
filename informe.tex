@@ -194,7 +194,14 @@ ambos modelos y el rol de la densidad en ella. El sistema se simula en una
 caja cuadrada de lado $L = 10$ con condiciones periódicas de contorno,
 radio de interacción $r_c = 1.0$ y rapidez constante $v = 0.03$. Estas magnitudes son adimensionales, propias de la
 parametrización estándar del modelo de Vicsek. Cada corrida usa una única
-semilla de aleatoriedad ($42$), sin promediar sobre réplicas.
+semilla de aleatoriedad ($42$), sin promediar sobre réplicas: en ambos
+modelos cada partícula actualiza su dirección en función de sus vecinos en
+cada paso, por lo que la información se mezcla rápidamente entre
+partículas y la influencia de la condición inicial (y por lo tanto de la
+semilla particular utilizada) se pierde mucho antes de llegar al estado
+estacionario. Bajo ese argumento, una única corrida suficientemente larga
+en estado estacionario es representativa del comportamiento típico del
+sistema, sin necesidad de promediar sobre réplicas con semillas distintas.
 
 Se estudiaron tres densidades altas, $\rho \in \{2, 4, 8\}$. Adicionalmente
 se estudiaron tres densidades bajas, $\rho \in \{1/\pi,\, 1/(2\pi),\,
@@ -252,7 +259,10 @@ $\sigma_{v_a}$ (y análogamente $\langle S \rangle$, $\sigma_S$) se calculan
 sobre la ventana temporal $[t_{\text{inicio}}, t_{\text{fin}}]$ de esa única
 corrida; por lo tanto, la barra de error representa la fluctuación temporal
 del observable dentro del estado estacionario, no una dispersión entre
-réplicas.
+réplicas. Esto es consistente con el argumento de la pérdida rápida de la
+condición inicial: una vez alcanzado el estado estacionario, la fluctuación
+temporal de una corrida larga cumple un rol análogo al de repetir la
+corrida con distintas semillas.
 
 \section{Resultados}
 \label{sec:resultados}
