@@ -108,3 +108,69 @@ std::vector<int> CellIndexMethod::get_neighbors(const std::vector<Particle>& par
     }
     return neighbors;
 }
+
+void CellIndexMethod::build_all_neighbors(const std::vector<Particle>& particles) {
+    build(particles);
+
+    int N = static_cast<int>(particles.size());
+    all_neighbors.assign(N, std::vector<int>());
+
+    const int dirs[4][2] = {{0, 1}, {1, 1}, {1, 0}, {1, -1}};
+
+    for (int cy = 0; cy < M; ++cy) {
+        for (int cx = 0; cx < M; ++cx) {
+            int cell = cy * M + cx;
+
+            // Pares dentro de la propia celda (cada par una sola vez).
+            for (int a = head[cell]; a != -1; a = next[a]) {
+                for (int b = next[a]; b != -1; b = next[b]) {
+                    try_pair(particles[a], particles[b], all_neighbors);
+                }
+            }
+
+            for (const auto& d : dirs) {
+                int ny = cy + d[0];
+                int nx = cx + d[1];
+
+                if (periodic) {
+                    ny = wrap(ny);
+                    nx = wrap(nx);
+                } else if (ny < 0 || ny >= M || nx < 0 || nx >= M) {
+                    continue;
+                }
+                if (ny == cy && nx == cx) continue;  // celda vecina envuelta sobre sí misma (M chico + PBC)
+
+                int ncell = ny * M + nx;
+                for (int a = head[cell]; a != -1; a = next[a]) {
+                    for (int b = head[ncell]; b != -1; b = next[b]) {
+                        try_pair(particles[a], particles[b], all_neighbors);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void CellIndexMethod::try_pair(const Particle& a, const Particle& b,
+                               std::vector<std::vector<int>>& neighbors) const {
+    double dx = b.position.x - a.position.x;
+    double dy = b.position.y - a.position.y;
+
+    if (periodic) {
+        if (dx > L / 2.0) dx -= L;
+        else if (dx < -L / 2.0) dx += L;
+        if (dy > L / 2.0) dy -= L;
+        else if (dy < -L / 2.0) dy += L;
+    }
+
+    double threshold = rc + a.radius + b.radius;
+
+    if (dx * dx + dy * dy <= threshold * threshold) {
+        neighbors[a.id].push_back(b.id);
+        neighbors[b.id].push_back(a.id);
+    }
+}
+
+const std::vector<std::vector<int>>& CellIndexMethod::get_all_neighbors() const {
+    return all_neighbors;
+}

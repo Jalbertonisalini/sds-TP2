@@ -136,8 +136,5 @@ double SimulationEngine::compute_largest_cluster_fraction() {
 }
 
 void SimulationEngine::run_cim_pass() {
-    cim.build(particles);
-    for (size_t i = 0; i < particles.size(); ++i) {
-        (void)cim.get_neighbors(particles, i);
-    }
+    cim.build_all_neighbors(particles);
 }

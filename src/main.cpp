@@ -55,6 +55,8 @@ void imprimir_uso(const char* programa) {
     std::cout << "Uso: " << programa << " [opciones]\n"
               << "Sin opciones corre la configuración por defecto y vuelca la trayectoria completa.\n\n"
               << "  --density <rho>     Densidad de partículas (default 4)\n"
+              << "  --n <N>             Cantidad de partículas (reemplaza density*L*L; sirve para\n"
+              << "                      usar los mismos N que el benchmark del TP1, ver punto g)\n"
               << "  --eta <eta>         Amplitud del ruido (default 0.5)\n"
               << "  --iterations <n>    Cantidad de pasos (default 10000)\n"
               << "  --model <modelo>    standard | voter (default voter)\n"
@@ -78,6 +80,7 @@ int main(int argc, char* argv[]) {
 
     bool allow_overlap = false; // Flag requerido
     unsigned int seed = 42;
+    int N_override = -1;        // Si se pasa --n, se usa en vez de density*L*L
     std::string output_path;
     std::string cim_timing_path;
 
@@ -98,6 +101,8 @@ int main(int argc, char* argv[]) {
 
         if (arg == "--density") {
             config.density = std::stod(valor);
+        } else if (arg == "--n") {
+            N_override = std::stoi(valor);
         } else if (arg == "--eta") {
             config.eta = std::stod(valor);
         } else if (arg == "--iterations") {
@@ -125,7 +130,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    int N = static_cast<int>(config.density * config.L * config.L);
+    int N = N_override >= 0 ? N_override
+                            : static_cast<int>(config.density * config.L * config.L);
     std::cout << "Generando " << N << " particulas (rho=" << config.density
               << ", eta=" << config.eta
               << ", modelo=" << (config.model == ModelType::Standard ? "standard" : "voter")
