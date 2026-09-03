@@ -22,7 +22,7 @@ def resumir_etas(directorio, modelo, etas):
     tinicios = cargar_tinicios()
     densidad = densidad_de_directorio(directorio)
 
-    xs, xs_err, ys, ys_err = [], [], [], []
+    xs, xs_err, ys = [], [], []
     for eta in etas:
         ruta = RESULTADOS / directorio / f"ruido_eta{float(eta)}.csv"
         if not ruta.exists():
@@ -37,8 +37,7 @@ def resumir_etas(directorio, modelo, etas):
         xs.append(S.mean())
         xs_err.append(S.std())
         ys.append(va.mean())
-        ys_err.append(va.std())
-    return xs, xs_err, ys, ys_err
+    return xs, xs_err, ys
 
 
 def clamp_err(centers, errs, lo=0.0, hi=1.0):
@@ -59,13 +58,15 @@ def graficar(directorios, modelo, etas, archivo_salida=None):
     colores = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
 
     for directorio, color in zip(directorios, colores):
-        xs, xs_err, ys, ys_err = resumir_etas(directorio, modelo, etas)
+        xs, xs_err, ys = resumir_etas(directorio, modelo, etas)
         x_lo, x_hi = clamp_err(xs, xs_err)
-        y_lo, y_hi = clamp_err(ys, ys_err)
+        # Curva + marcadores sin transparencia; barras de error (x) casi transparentes.
+        ax.plot(xs, ys, "o-", color=color, linewidth=1.2, markersize=5,
+                label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio))}$")
         ax.errorbar(
-            xs, ys, xerr=[x_lo, x_hi], yerr=[y_lo, y_hi],
-            fmt="o-", capsize=3, linewidth=1.2, markersize=5, color=color,
-            label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio))}$",
+            xs, ys, xerr=[x_lo, x_hi],
+            fmt="none", capsize=3, linewidth=1, elinewidth=1, color=color,
+            alpha=0.45,
         )
 
     ax.set_xlabel("Fracción de la componente gigante", fontsize=FUENTE)
