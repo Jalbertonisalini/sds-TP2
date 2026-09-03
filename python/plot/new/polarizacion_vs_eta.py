@@ -79,7 +79,7 @@ def graficar(directorios, modelo, archivo_salida=None):
                     fontsize=FUENTE - 8, color="gray")
 
     ax.set_xlabel("Ruido", fontsize=FUENTE)
-    ax.set_ylabel("Va", fontsize=FUENTE)
+    ax.set_ylabel("Polarización", fontsize=FUENTE)
     ax.tick_params(labelsize=FUENTE)
     ax.set_ylim(0, 1.05)
     ax.legend(loc="best", fontsize=FUENTE)

@@ -34,7 +34,7 @@ def graficar(casos, archivo_salida=None):
         ax.axvline(t_inicio, color=color, linestyle="--", linewidth=1.6, alpha=0.7)
 
     ax.set_xlabel("Pasos", fontsize=FUENTE)
-    ax.set_ylabel("Va", fontsize=FUENTE)
+    ax.set_ylabel("Polarización", fontsize=FUENTE)
     ax.tick_params(labelsize=FUENTE)
     ax.set_ylim(0, 1.05)
     ax.legend(loc="lower right", fontsize=FUENTE)

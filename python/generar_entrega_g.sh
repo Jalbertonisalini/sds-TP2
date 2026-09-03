@@ -7,7 +7,7 @@ E=../entrega
 python3 plot/new/polarizacion_vs_eta.py --directorio standard_30000/rho2 --directorio standard_30000/rho4 --directorio standard_30000/rho8 --modelo standard --salida $E/c_standard_3dens_30000.png
 python3 plot/new/polarizacion_vs_eta.py --directorio standard_30000/rho0.106 --directorio standard_30000/rho0.159 --directorio standard_30000/rho0.318 --modelo standard --salida $E/c_standard_lowdens_30000.png
 python3 plot/new/polarizacion_vs_eta.py --directorio voter_30000/rho2 --directorio voter_30000/rho4 --directorio voter_30000/rho8 --modelo voter --salida $E/c_voter_3dens_30000.png
-python3 plot/new/polarizacion_vs_eta.py --directorio voter_30000/rho0.106 --directorio voter_30000/rho0.159 --directorio voter_30000/rho0.318 --modelo voter --salida $E/c_voter_lowdens_30000.png
+python3 plot/new/polarizacion_vs_eta.py --directorio voter_30000/rho0.106 --directorio voter_30000/rho0.318 --modelo voter --salida $E/c_voter_lowdens_30000.png
 
 # --- d1) evolucion S(t), 30000 pasos ---
 python3 plot/new/clusters_vs_tiempo.py --directorio standard_30000/rho8 --directorio standard_30000/rho0.318 --modelo standard --eta 0.5 --salida $E/d1_standard_8_vs_low_30000.png
