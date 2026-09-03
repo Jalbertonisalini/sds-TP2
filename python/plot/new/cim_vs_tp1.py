@@ -61,6 +61,15 @@ def graficar(archivo_salida=None):
         ax.errorbar(ns, medias, yerr=stds, fmt="o-", capsize=3, linewidth=1.6,
                     markersize=6, color=color, label=etiqueta)
 
+    # Estilo de los gráficos d2: línea vertical punteada gris de referencia y valor
+    # gris rotulado en el borde inferior del eje, en algunos N representativos.
+    etiquetar_ns = {25, 50, 200, 350, 500, 650, 800}
+    trans = ax.get_xaxis_transform()
+    for n in etiquetar_ns:
+        ax.axvline(n, color="gray", linestyle=":", linewidth=1, alpha=0.6)
+        ax.text(n, -0.06, str(int(n)), transform=trans, ha="center", va="top",
+                fontsize=FUENTE - 8, color="gray")
+
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("Partículas", fontsize=FUENTE)
