@@ -71,9 +71,13 @@ def graficar(directorios, modelo, archivo_salida=None):
             label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio))}$",
         )
 
-    if modelo == "standard":
+    refs = {
+        "standard": (0.5, 1.5, 2.5, 3.5, 4.5),
+        "voter": (0.1, 0.3, 0.5, 0.7, 0.9),
+    }.get(modelo)
+    if refs:
         trans = ax.get_xaxis_transform()
-        for eta_ref in (0.5, 1.5, 2.5, 3.5, 4.5):
+        for eta_ref in refs:
             ax.axvline(eta_ref, color="gray", linestyle=":", linewidth=1, alpha=0.6)
             ax.text(eta_ref, -0.03, str(eta_ref), transform=trans, ha="center", va="top",
                     fontsize=FUENTE - 8, color="gray")
