@@ -1,5 +1,4 @@
 import csv
-import math
 import sys
 from pathlib import Path
 
@@ -10,12 +9,18 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config import RESULTADOS, OUTPUT_DIR
 
-# Punto g): tiempos de ejecución del CIM en función de N, comparando:
-#   - TP1: algoritmo del CIM de TP1 (Java) portado a C++, pensado desde el diseño
-#     para C++ (estructuras reutilizadas entre corridas, ver
-#     cim_tp1_bench/include/cell_index_method_reusable.hpp)
-#   - TP2: CIM real de TP2 (arrays planos, build/resultados/cim_timing_tp2.csv)
-# Log-log porque N y tiempo abarcan ~2 décadas cada uno.
+# Punto g): tiempos de ejecución del CIM en función del NÚMERO DE PARTÍCULAS (N),
+# comparando el CIM a los mismos N que el barrido del TP1:
+#   - TP1: algoritmo del CIM de TP1 (Java) portado a C++, L=20 (M=13, ver
+#     cim_tp1_bench/output/n_benchmark_cpp.csv)
+#   - TP2: CIM real de TP2 (L=10, M optimo, build/resultados/cim_timing_tp2.csv)
+# Ambas series miden el MISMO kernel compartido (cim_tp1_bench/include/
+# cell_index_method_shared.hpp); solo difiere la geometría de la caja (L, M).
+# Ambos conjuntos comparten los mismos valores de N, así que se superponen en el eje x.
+# Se compara a igual N (no a igual densidad) porque el tiempo del CIM escala con la
+# cantidad de partículas; a igual densidad en cajas distintas (L=20 vs L=10) TP1
+# tendría 4x particulas, que escondería el costo real.
+# Escala doble logarítmica porque N y tiempo abarcan varios ordenes de magnitud.
 
 FUENTE = 20
 TAM_FIG = (13, 6)
@@ -31,12 +36,13 @@ SERIES = [
 
 
 def leer_serie(ruta, regimen):
+    """Devuelve (ns, medias, stds) ordenados por N desde las columnas del CSV."""
     ns, medias, stds = [], [], []
     with open(ruta) as f:
         for row in csv.DictReader(f):
             if row["regimen"] != regimen:
                 continue
-            ns.append(int(row["N"]))
+            ns.append(float(row["N"]))
             medias.append(float(row["time_mean_ms"]))
             stds.append(float(row["time_std_ms"]))
     orden = sorted(range(len(ns)), key=lambda i: ns[i])
@@ -62,18 +68,6 @@ def graficar(archivo_salida=None):
     ax.tick_params(labelsize=FUENTE)
     ax.legend(loc="upper left", fontsize=FUENTE - 4)
     ax.grid(alpha=0.3, which="both")
-
-    # Líneas punteadas bajando desde los N de TP2 (las densidades reales del TP:
-    # rho=2,4,8 -> 200,400,800, y las bajas en fracciones de pi -> 10,15,31) para
-    # ubicarlas sobre la escala logarítmica sin reemplazar los ticks de potencias de 10.
-    if TP2_CSV.exists():
-        ns_tp2, _, _ = leer_serie(TP2_CSV, "tp2")
-        trans = ax.get_xaxis_transform()
-        for n in ns_tp2:
-            if math.log10(n) % 1 == 0:
-                continue  # coincide con un tick de potencia de 10 (ej. 10), ya está marcado
-            ax.axvline(n, color="gray", linestyle=":", linewidth=1, alpha=0.6)
-            ax.text(n, -0.03, str(n), transform=trans, ha="center", va="top", fontsize=FUENTE - 8, color="gray")
 
     if archivo_salida is None:
         OUTPUT_DIR.mkdir(exist_ok=True)

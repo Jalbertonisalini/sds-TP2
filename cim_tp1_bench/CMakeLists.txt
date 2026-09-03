@@ -12,5 +12,4 @@ include_directories(include)
 add_executable(cim_bench
     src/main.cpp
     src/cell_index_method.cpp
-    src/cell_index_method_reusable.cpp
 )

@@ -134,7 +134,3 @@ double SimulationEngine::compute_largest_cluster_fraction() {
     cim.build(particles);
     return largest_cluster_fraction();
 }
-
-void SimulationEngine::run_cim_pass() {
-    cim.build_all_neighbors(particles);
-}

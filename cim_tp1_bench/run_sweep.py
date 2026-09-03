@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Corre el mismo barrido de N que SDS-TP1 (Tarea 4.1, régimen "libre", L=20,
-rc=1, PBC), pero con el CIM de TP1 portado a C++ (cim_bench, pensado desde el
-diseño para C++: ver cell_index_method_reusable.hpp), para comparar tiempos
-contra SDS-TP1/output/tarea4/n_benchmark.csv.
+rc=1, PBC), pero con el CIM de TP1 portado a C++ (cim_bench), que usa el mismo
+kernel compartido que el --cim-timing del TP2 (cell_index_method_shared.hpp, ver
+punto g), para comparar tiempos contra SDS-TP1/output/tarea4/n_benchmark.csv.
 
 Reutiliza SDS-TP1/source/python/generate_input.py para generar los mismos
 inputs (mismo seed) que usó el benchmark original en Java.
