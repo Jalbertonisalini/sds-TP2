@@ -9,13 +9,18 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config import RESULTADOS, OUTPUT_DIR
 
-# Punto g): tiempos de ejecución del CIM en función del NÚMERO DE PARTÍCULAS (N),
-# comparando el CIM a los mismos N que el barrido del TP1:
-#   - TP1: algoritmo del CIM de TP1 (Java) portado a C++, L=20 (M=13, ver
-#     cim_tp1_bench/output/n_benchmark_cpp.csv)
-#   - TP2: CIM real de TP2 (L=10, M optimo, build/resultados/cim_timing_tp2.csv)
-# Ambas series miden el MISMO kernel compartido (cim_tp1_bench/include/
-# cell_index_method_shared.hpp); solo difiere la geometría de la caja (L, M).
+# Punto g): tiempos de ejecución en función del NÚMERO DE PARTÍCULAS (N), a los
+# mismos N que el barrido del TP1. Cuatro series:
+#   - TP1 CIM:            L=20, M=13 (cim_tp1_bench/output/n_benchmark_cpp.csv)
+#   - TP1 fuerza bruta:   L=20, M=1  (misma corrida, forceM1=true)
+#   - TP2 CIM:            L=10, M=10 (build/resultados/cim_timing_tp2.csv)
+#   - TP2 fuerza bruta:   L=10, M=1  (misma corrida, --cim-brute)
+# Las cuatro miden el MISMO kernel compartido (cim_tp1_bench/include/
+# cell_index_method_shared.hpp) con el mismo esquema de batching. M=1 deja una sola
+# celda, así que el kernel evalúa todos los pares una vez: eso es fuerza bruta
+# O(N^2). Lo que cambia entre series es solo la geometría (L, M).
+# La fuerza bruta da la pendiente de referencia: en log-log, O(N^2) es pendiente 2 y
+# el CIM tiende a pendiente 1, y ahí se ve la ganancia real de la grilla.
 # Ambos conjuntos comparten los mismos valores de N, así que se superponen en el eje x.
 # Se compara a igual N (no a igual densidad) porque el tiempo del CIM escala con la
 # cantidad de partículas; a igual densidad en cajas distintas (L=20 vs L=10) TP1
@@ -24,14 +29,18 @@ from config import RESULTADOS, OUTPUT_DIR
 
 FUENTE = 20
 TAM_FIG = (13, 6)
-COLORES = ["#1f77b4", "#ff7f0e", "#2ca02c"]
 
 PUERTO_CSV = Path(__file__).resolve().parent.parent.parent.parent.parent / "sds-TP2" / "cim_tp1_bench" / "output" / "n_benchmark_cpp.csv"
 TP2_CSV = RESULTADOS / "cim_timing_tp2.csv"
 
+# (etiqueta, csv, regimen, color, marcador, estilo de linea)
+# Mismo color por geometría; la fuerza bruta va punteada y con marcador hueco,
+# para que se lea "misma caja, otro algoritmo" de un vistazo.
 SERIES = [
-    ("TP1", PUERTO_CSV, "libre_cpp"),
-    ("TP2", TP2_CSV, "tp2"),
+    ("TP1 (CIM)",          PUERTO_CSV, "libre_cpp", "#1f77b4", "o", "-"),
+    ("TP1 (fuerza bruta)", PUERTO_CSV, "bruta_cpp", "#1f77b4", "s", ":"),
+    ("TP2 (CIM)",          TP2_CSV,    "tp2",       "#ff7f0e", "o", "-"),
+    ("TP2 (fuerza bruta)", TP2_CSV,    "bruta_tp2", "#ff7f0e", "s", ":"),
 ]
 
 
@@ -53,13 +62,18 @@ def graficar(archivo_salida=None):
     fig, ax = plt.subplots(figsize=TAM_FIG)
     fig.subplots_adjust(bottom=0.16, left=0.10)
 
-    for (etiqueta, ruta, regimen), color in zip(SERIES, COLORES):
+    for etiqueta, ruta, regimen, color, marcador, linea in SERIES:
         if not ruta.exists():
             print(f"Aviso: falta {ruta}, se omite '{etiqueta}'")
             continue
         ns, medias, stds = leer_serie(ruta, regimen)
-        ax.errorbar(ns, medias, yerr=stds, fmt="o-", capsize=3, linewidth=1.6,
-                    markersize=6, color=color, label=etiqueta)
+        if not ns:
+            print(f"Aviso: no hay filas con regimen='{regimen}' en {ruta}, se omite")
+            continue
+        ax.errorbar(ns, medias, yerr=stds, capsize=3, linewidth=1.6, markersize=7,
+                    color=color, marker=marcador, linestyle=linea,
+                    markerfacecolor=("none" if linea == ":" else color),
+                    label=etiqueta)
 
     # Estilo de los gráficos d2: línea vertical punteada gris de referencia y valor
     # gris rotulado en el borde inferior del eje, en algunos N representativos.
@@ -75,7 +89,7 @@ def graficar(archivo_salida=None):
     ax.set_xlabel("Partículas", fontsize=FUENTE)
     ax.set_ylabel("tiempo (ms)", fontsize=FUENTE)
     ax.tick_params(labelsize=FUENTE)
-    ax.legend(loc="upper left", fontsize=FUENTE - 4)
+    ax.legend(loc="upper left", fontsize=FUENTE - 6, ncol=2)
     ax.grid(alpha=0.3, which="both")
 
     if archivo_salida is None:

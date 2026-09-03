@@ -75,6 +75,8 @@ void imprimir_uso(const char* programa) {
               << "  --output <ruta>     CSV compacto Time,Polarization,S (un valor por paso)\n"
               << "  --cim-timing <ruta> Mide tiempo de CIM (build + vecinos) sobre config. inicial,\n"
               << "                      agrega una fila a <ruta> (no corre la simulación)\n"
+              << "  --cim-brute         Con --cim-timing: fuerza M=1 (una sola celda), o sea\n"
+              << "                      fuerza bruta O(N^2) con el mismo kernel (punto g)\n"
               << "  -h, --help          Mostrar esta ayuda\n";
 }
 
@@ -94,6 +96,7 @@ int main(int argc, char* argv[]) {
     int N_override = -1;        // Si se pasa --n, se usa en vez de density*L*L
     std::string output_path;
     std::string cim_timing_path;
+    bool cim_brute = false;     // --cim-brute: M=1, o sea fuerza bruta O(N^2)
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -101,6 +104,11 @@ int main(int argc, char* argv[]) {
         if (arg == "-h" || arg == "--help") {
             imprimir_uso(argv[0]);
             return 0;
+        }
+
+        if (arg == "--cim-brute") {
+            cim_brute = true;
+            continue;
         }
 
         if (i + 1 >= argc) {
@@ -157,7 +165,11 @@ int main(int argc, char* argv[]) {
         // (L=10, M óptimo = floor(L/(rc+2*r_max))), sin evolucionar la simulación.
         // Mismo esquema de batching que SDS-TP1/source/java/NBenchmark.java, para
         // poder comparar directo con esos tiempos.
-        int M = static_cast<int>(std::floor(config.L / (config.rc + 2.0 * config.r_max)));
+        // M=1 deja una sola celda: el kernel evalua todos los pares una vez, que es
+        // exactamente fuerza bruta O(N^2). Mismo codigo, misma medicion, sin grilla.
+        int M = cim_brute
+                    ? 1
+                    : static_cast<int>(std::floor(config.L / (config.rc + 2.0 * config.r_max)));
         std::vector<std::vector<int>> neighbors;
 
         auto run_pass = [&]() {
@@ -191,7 +203,7 @@ int main(int argc, char* argv[]) {
         }
         std::ofstream out(cim_timing_path, std::ios::app);
         if (write_header) out << "regimen,N,L,M,rho,time_mean_ms,time_std_ms,reps,batch\n";
-        out << "tp2," << N << "," << config.L << "," << M << ","
+        out << (cim_brute ? "bruta_tp2" : "tp2") << "," << N << "," << config.L << "," << M << ","
             << (N / (config.L * config.L)) << "," << mean << "," << stddev << ","
             << samples << "," << batch_size << "\n";
 

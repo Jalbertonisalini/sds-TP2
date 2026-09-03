@@ -8,29 +8,15 @@
 % --- Tema: solo colores, headline y footer custom ---
 \usecolortheme{dolphin}
 \setbeamertemplate{navigation symbols}{}
-% --- Footline: condiciones de la figura (izq) + numero de diapositiva (der) ---
-% Cada diapositiva con figura declara sus condiciones vía \cond{...}; el pie las
-% imprime y las limpia, así la siguiente arranca vacía.
-\gdef\condtext{}
-\newcommand{\cond}[1]{\gdef\condtext{#1}}
+% --- Footline: solo el numero de diapositiva (guia 1.2) ---
+% Las condiciones de simulacion NO van aca: estan una sola vez, en
+% "Parametros del estudio". En cada diapositiva de figura solo se repite el
+% parametro libre, a la derecha del titulo (ver \libre).
 \setbeamertemplate{footline}{%
-  \vskip2pt
-  {\color{gray!50}\hrule height 0.2pt}%
-  \vskip3pt
-  \hbox to\paperwidth{%
-    \hskip1.2em
-    % Alto fijo (3 renglones): si dependiera del texto, beamer calcularia mal
-    % la altura util del cuerpo y las figuras se pasarian de la diapositiva.
-    \begin{minipage}[t][19pt][t]{0.84\paperwidth}
-      \raggedright\tiny\color{black!65}\condtext
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t][19pt][t]{0.07\paperwidth}
-      \raggedleft\tiny\color{black!65}\insertframenumber\,/\,\inserttotalframenumber
-    \end{minipage}%
-    \hskip1.2em}%
-  \vskip4pt
-  \gdef\condtext{}%
+  \hbox to\paperwidth{\hfill
+    \small\color{black!65}\insertframenumber\,/\,\inserttotalframenumber
+    \hskip1.4em}%
+  \vskip6pt
 }
 
 % --- Paquetes ---
@@ -106,38 +92,35 @@
   \end{frame}
 }
 
-% Parametros fijos, comunes a todas las figuras (van al pie, no dentro)
-\newcommand{\pfijos}{%
-  $L = 1\times10^{1}\;\uu{m}$, contornos periodicos;
-  $r_c = 1\;\uu{m}$;
-  $v = 3\times10^{-2}\;\uu{m/s}$;
-  $\Delta t = 1\;\uu{s}$;
-  $3\times10^{4}$ pasos;
-  1 corrida (semilla fija)%
-}
+% Parametro libre de la diapositiva: va a la derecha del titulo, en negro.
+% Es lo unico que se repite por diapositiva; el resto de las condiciones esta
+% una sola vez en "Parametros del estudio".
+% El titulo de beamer va en \raggedright, o sea \rightskip = 0pt plus 1fil.
+% Un \hfill comun (1fil) se reparte el sobrante a medias con ese rightskip y el
+% parametro queda a media asta; con 1filll gana y se pega al margen derecho.
+\newcommand{\libre}[1]{\hskip 0pt plus 1filll\relax{\small\normalfont\color{black}#1}}
 
-% Figura unica, al maximo tamano posible. Las condiciones van al pie.
-\newcommand{\figuno}[2]{% #1 = imagen, #2 = condiciones
-  \cond{#2}%
+% Figura unica, al maximo tamano posible.
+\newcommand{\figuno}[1]{%
+  \vspace{-0.6em}
   \begin{center}
-    \includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{#1}
+    \includegraphics[width=\textwidth,height=0.84\textheight,keepaspectratio]{#1}
   \end{center}
 }
 
-% Dos figuras lado a lado (comparacion), cada una con su titulo justo debajo.
-% El par se centra en \paperwidth (no en \textwidth) para ganar ancho: el \hss
-% de los costados absorbe el desborde sin que LaTeX avise por overfull.
-\newcommand{\figdos}[5]{% #1 = izq, #2 = titulo izq, #3 = der, #4 = titulo der, #5 = condiciones
-  \cond{#5}%
+% Dos figuras lado a lado, cada una con su titulo justo debajo. El par se centra
+% en \paperwidth (no en \textwidth) para ganar ancho; el \hss de los costados
+% absorbe el desborde sin que LaTeX avise por overfull.
+\newcommand{\figdos}[4]{% #1 = izq, #2 = titulo izq, #3 = der, #4 = titulo der
   \begin{center}
     \hbox to \textwidth{\hss
-      \begin{minipage}[t]{0.48\paperwidth}
+      \begin{minipage}[t]{0.492\paperwidth}
         \centering
         \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{#1}
         \par\vspace{0.5em}{\small #2}
       \end{minipage}%
-      \hspace{0.015\paperwidth}%
-      \begin{minipage}[t]{0.48\paperwidth}
+      \hspace{0.008\paperwidth}%
+      \begin{minipage}[t]{0.492\paperwidth}
         \centering
         \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{#3}
         \par\vspace{0.5em}{\small #4}
@@ -147,28 +130,22 @@
 }
 
 % Placeholder de animacion.
-% Version impresa (PDF de entrega): fotograma fijo + link explicito debajo.
-% Version en vivo: animacion embebida en la diapositiva.
-\newcommand{\animph}[2]{% #1 = condiciones, #2 = link
-  \cond{#1}%
+% Version impresa (PDF de entrega): el hueco de arriba es para pegar el fotograma
+% representativo, y el link explicito va abajo (guia 2.4.8).
+% Version en vivo: animacion embebida en ese mismo hueco.
+\newcommand{\animph}[1]{% #1 = link
+  % beamer centra el cuerpo del frame con \vfil (1fil) arriba y abajo; con 1filll
+  % este gana y empuja el link contra el borde inferior, que es donde va segun la
+  % guia 2.4.8 (debajo del fotograma).
+  \vskip 0pt plus 1filll
   \begin{center}
   \ifpptprint
-    \begin{tikzpicture}
-      \draw[dashed,gray,line width=1pt] (0,0) rectangle (13.4,4.4);
-      \node[gray,font=\normalsize] at (6.7,2.6)
-        {[Fotograma representativo de la animacion]};
-      \node[gray,font=\small] at (6.7,1.9)
-        {reemplazar por la captura correspondiente};
-    \end{tikzpicture}
-    \par\vspace{0.5em}
-    {\footnotesize Video: \href{#2}{\texttt{#2}}}
+    {\footnotesize Video: \href{#1}{\texttt{#1}}}
   \else
-    \begin{tikzpicture}
-      \draw[dashed,gray,line width=1pt] (0,0) rectangle (13.4,5.0);
-      \node[gray,font=\normalsize] at (6.7,2.5) {[Animacion embebida]};
-    \end{tikzpicture}
+    {\large\color{gray}[Animacion embebida]}
   \fi
   \end{center}
+  \vspace{0.4em}
 }
 
 % --- Metadatos ---
@@ -399,6 +376,17 @@
 % Frames 13-53
 % ============================================================
 
+% Reglas de encabezado, iguales para diapositivas de una figura y de dos:
+%   - El modelo (Estandar / Votante) va SIEMPRE en el titulo.
+%   - El parametro variable va SIEMPRE a la derecha, nunca en el titulo.
+%   - No se repite nada que ya se lea dentro de la figura (leyenda o eje):
+%       b    -> leyenda = eta            => a la derecha va rho
+%       c,d2 -> leyenda = rho, eje = eta => a la derecha no va nada
+%       d1   -> leyenda = rho, eta fijo  => a la derecha va eta
+%       e    -> leyenda = rho, sin eta   => a la derecha va el rango de eta
+%   - N no se muestra: sale de rho y L, y esta en "Parametros del estudio".
+% Las diapositivas de animacion no tienen leyenda, asi que llevan rho y eta.
+
 % --- Frame 13 ---
 \seccion{Resultados}
 
@@ -406,236 +394,208 @@
 % b) Evolucion temporal de la polarizacion   (frames 14-28)
 % ------------------------------------------------------------
 
-% ---- rho = 2 ----
-
 % --- Frame 14 ---
-\begin{frame}{Animacion --- Estandar, $\rho = 2\;\uu{m^{-2}}$}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 2\;\uu{m^{-2}}$, $N = 2\times10^{2}$; $\eta = 0.5$ y $\eta = 3.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 2\;\uu{m^{-2}}$, $\eta = 0.5$ y $3.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 15 ---
-\begin{frame}{Evolucion de la polarizacion --- Estandar, $\rho = 2\;\uu{m^{-2}}$}
-  \figuno{entrega/b/evolucion_va_ruidos_30000_rho2.png}{\pfijos. \textbf{Estandar}; $\rho = 2\;\uu{m^{-2}}$, $N = 2\times10^{2}$; $\eta = 0.5;\ 1.5;\ 3.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Polarizacion vs tiempo --- Estandar \libre{$\rho = 2\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_ruidos_30000_rho2.png}
 \end{frame}
 
 % --- Frame 16 ---
-\begin{frame}{Animacion --- Votante, $\rho = 2\;\uu{m^{-2}}$}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 2\;\uu{m^{-2}}$, $N = 2\times10^{2}$; $\eta = 0.05$ y $\eta = 0.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 2\;\uu{m^{-2}}$, $\eta = 0.05$ y $0.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 17 ---
-\begin{frame}{Evolucion de la polarizacion --- Votante, $\rho = 2\;\uu{m^{-2}}$}
-  \figuno{entrega/b/evolucion_va_voter_30000_rho2.png}{\pfijos. \textbf{Votante}; $\rho = 2\;\uu{m^{-2}}$, $N = 2\times10^{2}$; $\eta = 0.05;\ 0.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Polarizacion vs tiempo --- Votante \libre{$\rho = 2\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_voter_30000_rho2.png}
 \end{frame}
 
 % --- Frame 18 ---
-\begin{frame}{Comparacion Estandar vs Votante --- $v_a(t)$, $\rho = 2\;\uu{m^{-2}}$}
-  \figdos%
-    {entrega/b/evolucion_va_ruidos_30000_rho2.png}%
+\begin{frame}{Comparacion Estandar vs Votante --- $v_a(t)$ \libre{$\rho = 2\;\uu{m^{-2}}$}}
+  \figdos{entrega/b/evolucion_va_ruidos_30000_rho2.png}%
     {Estandar}%
     {entrega/b/evolucion_va_voter_30000_rho2.png}%
-    {Votante}%
-    {\pfijos. $\rho = 2\;\uu{m^{-2}}$; $N = 2\times10^{2}$.}
+    {Votante}
 \end{frame}
 
-% ---- rho = 4 ----
-
 % --- Frame 19 ---
-\begin{frame}{Animacion --- Estandar, $\rho = 4\;\uu{m^{-2}}$}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 4\;\uu{m^{-2}}$, $N = 4\times10^{2}$; $\eta = 0.5$ y $\eta = 3.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 4\;\uu{m^{-2}}$, $\eta = 0.5$ y $3.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 20 ---
-\begin{frame}{Evolucion de la polarizacion --- Estandar, $\rho = 4\;\uu{m^{-2}}$}
-  \figuno{entrega/b/evolucion_va_ruidos_30000.png}{\pfijos. \textbf{Estandar}; $\rho = 4\;\uu{m^{-2}}$, $N = 4\times10^{2}$; $\eta = 0.5;\ 1.5;\ 3.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Polarizacion vs tiempo --- Estandar \libre{$\rho = 4\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_ruidos_30000.png}
 \end{frame}
 
 % --- Frame 21 ---
-\begin{frame}{Animacion --- Votante, $\rho = 4\;\uu{m^{-2}}$}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 4\;\uu{m^{-2}}$, $N = 4\times10^{2}$; $\eta = 0.05$ y $\eta = 0.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 4\;\uu{m^{-2}}$, $\eta = 0.05$ y $0.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 22 ---
-\begin{frame}{Evolucion de la polarizacion --- Votante, $\rho = 4\;\uu{m^{-2}}$}
-  \figuno{entrega/b/evolucion_va_voter_30000.png}{\pfijos. \textbf{Votante}; $\rho = 4\;\uu{m^{-2}}$, $N = 4\times10^{2}$; $\eta = 0.05;\ 0.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Polarizacion vs tiempo --- Votante \libre{$\rho = 4\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_voter_30000.png}
 \end{frame}
 
 % --- Frame 23 ---
-\begin{frame}{Comparacion Estandar vs Votante --- $v_a(t)$, $\rho = 4\;\uu{m^{-2}}$}
-  \figdos%
-    {entrega/b/evolucion_va_ruidos_30000.png}%
+\begin{frame}{Comparacion Estandar vs Votante --- $v_a(t)$ \libre{$\rho = 4\;\uu{m^{-2}}$}}
+  \figdos{entrega/b/evolucion_va_ruidos_30000.png}%
     {Estandar}%
     {entrega/b/evolucion_va_voter_30000.png}%
-    {Votante}%
-    {\pfijos. $\rho = 4\;\uu{m^{-2}}$; $N = 4\times10^{2}$.}
+    {Votante}
 \end{frame}
 
-% ---- rho = 8 ----
-
 % --- Frame 24 ---
-\begin{frame}{Animacion --- Estandar, $\rho = 8\;\uu{m^{-2}}$}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 8\;\uu{m^{-2}}$, $N = 8\times10^{2}$; $\eta = 0.5$ y $\eta = 3.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 8\;\uu{m^{-2}}$, $\eta = 0.5$ y $3.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 25 ---
-\begin{frame}{Evolucion de la polarizacion --- Estandar, $\rho = 8\;\uu{m^{-2}}$}
-  \figuno{entrega/b/evolucion_va_ruidos_30000_rho8.png}{\pfijos. \textbf{Estandar}; $\rho = 8\;\uu{m^{-2}}$, $N = 8\times10^{2}$; $\eta = 0.5;\ 1.5;\ 3.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Polarizacion vs tiempo --- Estandar \libre{$\rho = 8\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_ruidos_30000_rho8.png}
 \end{frame}
 
 % --- Frame 26 ---
-\begin{frame}{Animacion --- Votante, $\rho = 8\;\uu{m^{-2}}$}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 8\;\uu{m^{-2}}$, $N = 8\times10^{2}$; $\eta = 0.05$ y $\eta = 0.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 8\;\uu{m^{-2}}$, $\eta = 0.05$ y $0.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 27 ---
-\begin{frame}{Evolucion de la polarizacion --- Votante, $\rho = 8\;\uu{m^{-2}}$}
-  \figuno{entrega/b/evolucion_va_voter_30000_rho8.png}{\pfijos. \textbf{Votante}; $\rho = 8\;\uu{m^{-2}}$, $N = 8\times10^{2}$; $\eta = 0.05;\ 0.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Polarizacion vs tiempo --- Votante \libre{$\rho = 8\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_voter_30000_rho8.png}
 \end{frame}
 
 % --- Frame 28 ---
-\begin{frame}{Comparacion Estandar vs Votante --- $v_a(t)$, $\rho = 8\;\uu{m^{-2}}$}
-  \figdos%
-    {entrega/b/evolucion_va_ruidos_30000_rho8.png}%
+\begin{frame}{Comparacion Estandar vs Votante --- $v_a(t)$ \libre{$\rho = 8\;\uu{m^{-2}}$}}
+  \figdos{entrega/b/evolucion_va_ruidos_30000_rho8.png}%
     {Estandar}%
     {entrega/b/evolucion_va_voter_30000_rho8.png}%
-    {Votante}%
-    {\pfijos. $\rho = 8\;\uu{m^{-2}}$; $N = 8\times10^{2}$.}
+    {Votante}
 \end{frame}
 
 % ------------------------------------------------------------
 % c) Polarizacion media vs ruido   (frames 29-38)
 % ------------------------------------------------------------
 
-% ---- densidades 2, 4, 8 ----
-
 % --- Frame 29 ---
-\begin{frame}{Animacion --- Estandar, barrido de $\eta$}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$; Extremos del barrido:; $\eta = 0$ y $\eta = 5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$, $\eta = 0$ y $5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 30 ---
-\begin{frame}{$\langle v_a \rangle$ vs $\eta$ --- Estandar}
-  \figuno{entrega/c/c_standard_3dens_30000.png}{\pfijos. \textbf{Estandar}; $\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$; $N = 2;\,4;\,8 \times10^{2}$; $\eta = 0$ a $5$, paso $0.25$. Promedio y desvio en el estacionario.}
+\begin{frame}{Polarizacion media vs ruido --- Estandar}
+  \figuno{entrega/c/c_standard_3dens_30000.png}
 \end{frame}
 
 % --- Frame 31 ---
-\begin{frame}{Animacion --- Votante, barrido de $\eta$}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$; Extremos del barrido:; $\eta = 0$ y $\eta = 1$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$, $\eta = 0$ y $1$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 32 ---
-\begin{frame}{$\langle v_a \rangle$ vs $\eta$ --- Votante}
-  \figuno{entrega/c/c_voter_3dens_30000.png}{\pfijos. \textbf{Votante}; $\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$; $N = 2;\,4;\,8 \times10^{2}$; $\eta = 0$ a $1$, paso $0.05$. Promedio y desvio en el estacionario.}
+\begin{frame}{Polarizacion media vs ruido --- Votante}
+  \figuno{entrega/c/c_voter_3dens_30000.png}
 \end{frame}
 
 % --- Frame 33 ---
 \begin{frame}{Comparacion Estandar vs Votante --- $\langle v_a \rangle$ vs $\eta$}
-  \figdos%
-    {entrega/c/c_standard_3dens_30000.png}%
-    {Estandar ($\eta \leq 5$)}%
+  \figdos{entrega/c/c_standard_3dens_30000.png}%
+    {Estandar}%
     {entrega/c/c_voter_3dens_30000.png}%
-    {Votante ($\eta \leq 1$)}%
-    {\pfijos. $\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$. Notar la diferencia de escala en $\eta$.}
+    {Votante}
 \end{frame}
 
-% ---- densidades bajas ----
-
 % --- Frame 34 ---
-\begin{frame}{Animacion --- Estandar, densidades bajas}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 1/\pi;\ 1/2\pi;\ 1/3\pi\;\uu{m^{-2}}$; $N = 31;\ 15;\ 10$; $\eta = 0$ y $\eta = 5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 1/\pi;\ 1/2\pi;\ 1/3\pi\;\uu{m^{-2}}$, $\eta = 0$ y $5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 35 ---
-\begin{frame}{$\langle v_a \rangle$ vs $\eta$ --- Estandar, densidades bajas}
-  \figuno{entrega/c/c_standard_lowdens_30000.png}{\pfijos. \textbf{Estandar}; $\rho = 1/\pi;\ 1/2\pi;\ 1/3\pi\;\uu{m^{-2}}$; $N = 31;\ 15;\ 10$; $\eta = 0$ a $5$, paso $0.25$.}
+\begin{frame}{Polarizacion media vs ruido --- Estandar \libre{densidades bajas}}
+  \figuno{entrega/c/c_standard_lowdens_30000.png}
 \end{frame}
 
 % --- Frame 36 ---
-\begin{frame}{Animacion --- Votante, densidades bajas}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 1/\pi;\ 1/3\pi\;\uu{m^{-2}}$; $N = 31;\ 10$; $\eta = 0$ y $\eta = 1$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 1/\pi;\ 1/3\pi\;\uu{m^{-2}}$, $\eta = 0$ y $1$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 37 ---
-\begin{frame}{$\langle v_a \rangle$ vs $\eta$ --- Votante, densidades bajas}
-  \figuno{entrega/c/c_voter_lowdens_30000.png}{\pfijos. \textbf{Votante}; $\rho = 1/\pi;\ 1/3\pi\;\uu{m^{-2}}$; $N = 31;\ 10$; $\eta = 0$ a $1$, paso $0.05$.}
+\begin{frame}{Polarizacion media vs ruido --- Votante \libre{densidades bajas}}
+  \figuno{entrega/c/c_voter_lowdens_30000.png}
 \end{frame}
 
 % --- Frame 38 ---
-\begin{frame}{Comparacion --- $\langle v_a \rangle$ vs $\eta$, densidades bajas}
-  \figdos%
-    {entrega/c/c_standard_lowdens_30000.png}%
+\begin{frame}{Comparacion Estandar vs Votante --- $\langle v_a \rangle$ vs $\eta$ \libre{densidades bajas}}
+  \figdos{entrega/c/c_standard_lowdens_30000.png}%
     {Estandar}%
     {entrega/c/c_voter_lowdens_30000.png}%
-    {Votante}%
-    {\pfijos. Regimen diluido; $\rho \leq 1/\pi\;\uu{m^{-2}}$.}
+    {Votante}
 \end{frame}
 
 % ------------------------------------------------------------
 % d) Cluster mas grande   (frames 39-48)
 % ------------------------------------------------------------
 
-% ---- d-1) evolucion de S(t) ----
-
 % --- Frame 39 ---
-\begin{frame}{Animacion --- Estandar, clusters}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 2\;\uu{m^{-2}}$ ($N = 2\times10^{2}$); vs $\rho = 1/\pi\;\uu{m^{-2}}$ ($N = 31$); $\eta = 0.5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 2$ y $1/\pi\;\uu{m^{-2}}$, $\eta = 0.5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 40 ---
-\begin{frame}{Evolucion de $S$ --- Estandar}
-  \figuno{entrega/d1/d1_standard_2_vs_low_30000.png}{\pfijos. \textbf{Estandar}; $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$; $N = 2\times10^{2}$ y $31$; $\eta = 0.5$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Cluster mas grande vs tiempo --- Estandar \libre{$\eta = 0.5$}}
+  \figuno{entrega/d1/d1_standard_2_vs_low_30000.png}
 \end{frame}
 
 % --- Frame 41 ---
-\begin{frame}{Animacion --- Votante, clusters}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 2\;\uu{m^{-2}}$ ($N = 2\times10^{2}$); vs $\rho = 1/\pi\;\uu{m^{-2}}$ ($N = 31$); $\eta = 0.1$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 2$ y $1/\pi\;\uu{m^{-2}}$, $\eta = 0.1$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 42 ---
-\begin{frame}{Evolucion de $S$ --- Votante}
-  \figuno{entrega/d1/d1_voter_2_vs_low_30000.png}{\pfijos. \textbf{Votante}; $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$; $N = 2\times10^{2}$ y $31$; $\eta = 0.1$. Lineas verticales: inicio del estacionario ($t_{\text{ini}}$).}
+\begin{frame}{Cluster mas grande vs tiempo --- Votante \libre{$\eta = 0.1$}}
+  \figuno{entrega/d1/d1_voter_2_vs_low_30000.png}
 \end{frame}
 
 % --- Frame 43 ---
 \begin{frame}{Comparacion Estandar vs Votante --- $S(t)$}
-  \figdos%
-    {entrega/d1/d1_standard_2_vs_low_30000.png}%
+  \figdos{entrega/d1/d1_standard_2_vs_low_30000.png}%
     {Estandar ($\eta = 0.5$)}%
     {entrega/d1/d1_voter_2_vs_low_30000.png}%
-    {Votante ($\eta = 0.1$)}%
-    {\pfijos. $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$.}
+    {Votante ($\eta = 0.1$)}
 \end{frame}
 
-% ---- d-2) <S> vs eta ----
-
 % --- Frame 44 ---
-\begin{frame}{Animacion --- Estandar, barrido de $\eta$ (clusters)}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$; Extremos del barrido:; $\eta = 0$ y $\eta = 5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 2$ y $1/\pi\;\uu{m^{-2}}$, $\eta = 0$ y $5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 45 ---
-\begin{frame}{$\langle S \rangle$ vs $\eta$ --- Estandar}
-  \figuno{entrega/d2/d2_standard_2_vs_low_30000.png}{\pfijos. \textbf{Estandar}; $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$; $N = 2\times10^{2}$ y $31$; $\eta = 0$ a $5$, paso $0.25$. Promedio y desvio en el estacionario.}
+\begin{frame}{Cluster mas grande vs ruido --- Estandar}
+  \figuno{entrega/d2/d2_standard_2_vs_low_30000.png}
 \end{frame}
 
 % --- Frame 46 ---
-\begin{frame}{Animacion --- Votante, barrido de $\eta$ (clusters)}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$; Extremos del barrido:; $\eta = 0$ y $\eta = 1$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 2$ y $1/\pi\;\uu{m^{-2}}$, $\eta = 0$ y $1$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 47 ---
-\begin{frame}{$\langle S \rangle$ vs $\eta$ --- Votante}
-  \figuno{entrega/d2/d2_voter_2_vs_low_30000.png}{\pfijos. \textbf{Votante}; $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$; $N = 2\times10^{2}$ y $31$; $\eta = 0$ a $1$, paso $0.05$. Promedio y desvio en el estacionario.}
+\begin{frame}{Cluster mas grande vs ruido --- Votante}
+  \figuno{entrega/d2/d2_voter_2_vs_low_30000.png}
 \end{frame}
 
 % --- Frame 48 ---
 \begin{frame}{Comparacion Estandar vs Votante --- $\langle S \rangle$ vs $\eta$}
-  \figdos%
-    {entrega/d2/d2_standard_2_vs_low_30000.png}%
-    {Estandar ($\eta \leq 5$)}%
+  \figdos{entrega/d2/d2_standard_2_vs_low_30000.png}%
+    {Estandar}%
     {entrega/d2/d2_voter_2_vs_low_30000.png}%
-    {Votante ($\eta \leq 1$)}%
-    {\pfijos. $\rho = 2$ y $1/\pi\;\uu{m^{-2}}$. Notar la diferencia de escala en $\eta$.}
+    {Votante}
 \end{frame}
 
 % ------------------------------------------------------------
@@ -643,33 +603,31 @@
 % ------------------------------------------------------------
 
 % --- Frame 49 ---
-\begin{frame}{Animacion --- Estandar, $v_a$ vs $S$}
-  \animph{\pfijos. \textbf{Estandar}; $\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$; Extremos: $\eta = 0$ y $\eta = 5$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Estandar \libre{$\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$, $\eta = 0$ y $5$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 50 ---
-\begin{frame}{$\langle v_a \rangle$ vs $\langle S \rangle$ --- Estandar}
-  \figuno{entrega/e/e_standard_4dens_30000.png}{\pfijos. \textbf{Estandar}; $\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$; $N = 10;\ 31;\ 2\times10^{2};\ 8\times10^{2}$; $\eta = 0;\,0.5;\,1;\,1.5;\,2;\,2.5;\,3;\,4;\,5$.}
+\begin{frame}{Polarizacion vs componente gigante --- Estandar \libre{9 valores de $\eta$ entre $0$ y $5$}}
+  \figuno{entrega/e/e_standard_4dens_30000.png}
 \end{frame}
 
 % --- Frame 51 ---
-\begin{frame}{Animacion --- Votante, $v_a$ vs $S$}
-  \animph{\pfijos. \textbf{Votante}; $\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$; Extremos: $\eta = 0.05$ y $\eta = 1$.}{https://youtu.be/XXXXX}
+\begin{frame}{Animacion --- Votante \libre{$\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$, $\eta = 0.05$ y $1$}}
+  \animph{https://youtu.be/XXXXX}
 \end{frame}
 
 % --- Frame 52 ---
-\begin{frame}{$\langle v_a \rangle$ vs $\langle S \rangle$ --- Votante}
-  \figuno{entrega/e/e_voter_4dens_30000.png}{\pfijos. \textbf{Votante}; $\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$; $N = 10;\ 31;\ 2\times10^{2};\ 8\times10^{2}$; $\eta = 0.05;\,0.1;\,0.2;\,0.4;\,0.6;\,0.8;\,1$.}
+\begin{frame}{Polarizacion vs componente gigante --- Votante \libre{7 valores de $\eta$ entre $0.05$ y $1$}}
+  \figuno{entrega/e/e_voter_4dens_30000.png}
 \end{frame}
 
 % --- Frame 53 ---
 \begin{frame}{Comparacion Estandar vs Votante --- $\langle v_a \rangle$ vs $\langle S \rangle$}
-  \figdos%
-    {entrega/e/e_standard_4dens_30000.png}%
+  \figdos{entrega/e/e_standard_4dens_30000.png}%
     {Estandar}%
     {entrega/e/e_voter_4dens_30000.png}%
-    {Votante}%
-    {\pfijos. $\rho = 1/3\pi;\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$.}
+    {Votante}
 \end{frame}
 
 % ============================================================
@@ -681,23 +639,16 @@
 \seccion{Desempeno del CIM}
 
 % --- Frame 55 ---
-\begin{frame}{Tiempos de ejecucion del CIM --- comparacion con TP1}
-  \cond{Mismo kernel en ambas series, solo cambia la geometria:
-    \textbf{TP1} $L = 2\times10^{1}\;\uu{m}$, $M = 13$;
-    \textbf{TP2} $L = 1\times10^{1}\;\uu{m}$, $M = 10$.
-    $r_c = 1\;\uu{m}$, contornos periodicos; configuracion estatica (sin evolucionar
-    la simulacion); lotes de $1\times10^{2}$ corridas; $N = 10$ a $1\times10^{3}$;
-    media y desvio sobre las muestras.}
+\begin{frame}{Tiempos de ejecucion
+    \libre{\textbf{TP1} $L = 2\times10^{1}\;\uu{m}$, $M = 13$;
+           \textbf{TP2} $L = 1\times10^{1}\;\uu{m}$, $M = 10$; fuerza bruta $M = 1$}}
+  % Este encabezado ocupa dos renglones (son tres geometrias), asi que la figura
+  % va con un tope de alto propio en vez del \figuno general.
+  \vspace{-0.6em}
   \begin{center}
-    \includegraphics[width=\textwidth,height=0.66\textheight,keepaspectratio]
+    \includegraphics[width=\textwidth,height=0.76\textheight,keepaspectratio]
       {entrega/g/g_cim_vs_tp1.png}
   \end{center}
-  \vspace{-0.4em}
-  \begin{itemize}
-    \footnotesize
-    \item Se comparan a igual $N$: el costo del CIM escala con la cantidad de
-      particulas, no con la densidad.
-  \end{itemize}
 \end{frame}
 
 % ============================================================

@@ -15,6 +15,10 @@
 // geometría de la caja (L y M). Ver cell_index_method_shared.hpp.
 // Uso: cim_bench <N> <L> <rc> <periodic> <regimen> [csv] [forceM1] [static_path] [dynamic_path]
 //
+// forceM1=true fuerza M=1: una sola celda, o sea TODOS los pares evaluados una vez.
+// Eso es exactamente fuerza bruta O(N^2), medida con el mismo kernel y el mismo
+// esquema de batching que el CIM, que es lo que pide la comparacion del punto g).
+//
 // Lee los mismos input/static.txt e input/dynamic.txt generados por
 // SDS-TP1/source/python/generate_input.py (no se regenera acá), con el mismo esquema
 // de batching que NBenchmark.java, para poder comparar tiempos contra SDS-TP1.
@@ -99,15 +103,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int batch_size;
-    int samples;
-    if (force_m1) {
-        batch_size = 1;
-        samples = 10;
-    } else {
-        batch_size = 100;
-        samples = (N <= 200 ? 300000 : 3000) / batch_size;
-    }
+    // Mismo esquema de batching para CIM (M optimo) y fuerza bruta (M=1): las cuatro
+    // series del punto g) tienen que ser comparables entre si, no solo de a pares.
+    int batch_size = 100;
+    int samples = (N <= 200 ? 300000 : 3000) / batch_size;
 
     std::vector<std::vector<int>> neighbors;
     Welford stats = cim_tp1::benchmark(

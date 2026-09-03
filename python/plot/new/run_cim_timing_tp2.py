@@ -29,11 +29,13 @@ def main():
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     csv_path.unlink(missing_ok=True)
 
+    # Dos corridas por N: CIM (M optimo) y fuerza bruta (--cim-brute fuerza M=1,
+    # o sea todos los pares con el mismo kernel). Punto g).
     for n in N_VALUES:
-        subprocess.run(
-            [str(SIMULADOR), "--n", str(n), "--model", "standard", "--cim-timing", str(csv_path)],
-            check=True,
-        )
+        base = [str(SIMULADOR), "--n", str(n), "--model", "standard",
+                "--cim-timing", str(csv_path)]
+        subprocess.run(base, check=True)
+        subprocess.run(base + ["--cim-brute"], check=True)
 
     print(f"Listo: {csv_path}")
 

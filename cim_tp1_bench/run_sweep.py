@@ -44,6 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--csv", type=Path, default=AQUI / "output" / "n_benchmark_cpp.csv")
     parser.add_argument("--regimen", default="libre_cpp")
+    parser.add_argument("--regimen-bruta", default="bruta_cpp")
     args = parser.parse_args()
 
     if not BINARIO.exists():
@@ -51,6 +52,7 @@ def main():
 
     args.csv.parent.mkdir(parents=True, exist_ok=True)
     limpiar_csv(args.csv, args.regimen)
+    limpiar_csv(args.csv, args.regimen_bruta)
 
     static_path = TP1 / "input" / "static.txt"
     dynamic_path = TP1 / "input" / "dynamic.txt"
@@ -61,11 +63,13 @@ def main():
              "--n", str(n), "--l", str(L), "--seed", str(SEED)],
             cwd=TP1, check=True,
         )
-        subprocess.run(
-            [str(BINARIO), str(n), str(L), str(RC), "true", args.regimen,
-             str(args.csv), "false", str(static_path), str(dynamic_path)],
-            check=True,
-        )
+        # Dos corridas por N con el mismo input: CIM (M optimo) y fuerza bruta (M=1).
+        for regimen, force_m1 in ((args.regimen, "false"), (args.regimen_bruta, "true")):
+            subprocess.run(
+                [str(BINARIO), str(n), str(L), str(RC), "true", regimen,
+                 str(args.csv), force_m1, str(static_path), str(dynamic_path)],
+                check=True,
+            )
 
     print(f"Listo: {args.csv}")
 
