@@ -65,14 +65,14 @@
       \pgfmathsetmacro{\bx}{0}
 
       \dgrp{3}{6}{Intro.}
-      \dgrp{7}{9}{Impl.}
-      \dgrp{10}{14}{Sim.}
-      \dgrp{15}{30}{b) Evolución}
-      \dgrp{31}{40}{c) Polar.}
-      \dgrp{41}{50}{d) Cluster}
-      \dgrp{51}{55}{e) Rel.}
-      \dgrp{56}{57}{CIM}
-      \dgrp{58}{60}{Conc.}
+      \dgrp{7}{8}{Impl.}
+      \dgrp{9}{13}{Sim.}
+      \dgrp{14}{23}{b) Evolución}
+      \dgrp{24}{26}{c) Polar.}
+      \dgrp{27}{33}{d) Cluster}
+      \dgrp{34}{36}{e) Rel.}
+      \dgrp{37}{38}{CIM}
+      \dgrp{39}{41}{Conc.}
     \end{tikzpicture}
   \end{beamercolorbox}
 }
@@ -256,7 +256,7 @@
 
 % ============================================================
 \section{Implementación}
-% Frames 7-9
+% Frames 7-8
 % ============================================================
 
 % --- Frame 7 ---
@@ -287,32 +287,23 @@
   \end{center}
 \end{frame}
 
-% --- Frame 9 ---
-\begin{frame}{Método del Índice Celular (CIM)}
-  \begin{itemize}
-    \item Grilla $M \times M$, celdas de tamaño $\geq r_c$
-    \item Listas enlazadas con arreglos planos (cache-friendly)
-    \item Solo se inspeccionan 9 celdas vecinas
-      $\Rightarrow$ búsqueda en $\mathcal{O}(N)$
-    \item Contornos periódicos con envoltura modular
-  \end{itemize}
-\end{frame}
+% --- Frame 9 (eliminado: Método del Índice Celular)
 
 % ============================================================
 \section{Simulaciones}
-% Frames 10-14
+% Frames 9-13
 % ============================================================
 
-% --- Frame 10 ---
+% --- Frame 9 ---
 \seccion{Simulaciones}
 
-% --- Frame 11 ---
+% --- Frame 10 ---
 \begin{frame}{Geometría del sistema}
   \begin{columns}[T]
     \column{0.5\textwidth}
     \begin{itemize}
       \item Caja cuadrada $L \times L$, $L = 1\times10^{1}\;\uu{m}$
-      \item Contornos periódicos (topología toroidal)
+      \item Contornos periódicos
       \item Radio de interacción $r_c = 1\;\uu{m}$
       \item Velocidad constante $v = 3\times10^{-2}\;\uu{m/s}$
       \item Paso temporal $\Delta t = 1\;\uu{s}$
@@ -335,7 +326,7 @@
   \end{columns}
 \end{frame}
 
-% --- Frame 12 ---
+% --- Frame 11 ---
 \begin{frame}{Parámetros del estudio}
   \begin{table}
     \centering\small
@@ -362,7 +353,7 @@
   del observable dentro del estacionario.
 \end{frame}
 
-% --- Frame 13 ---
+% --- Frame 12 ---
 \begin{frame}{Observables: polarización}
   \vfill
   \Large
@@ -386,7 +377,7 @@
   \vfill
 \end{frame}
 
-% --- Frame 14 ---
+% --- Frame 13 ---
 \begin{frame}{Observables: cluster más grande}
   \vfill
   \Large
@@ -406,7 +397,7 @@
 
 % ============================================================
 \section{Resultados}
-% Frames 15-55
+% Frames 14-36
 % ============================================================
 
 % Reglas de encabezado, iguales para diapositivas de una figura y de dos:
@@ -420,96 +411,57 @@
 %   - N no se muestra: sale de rho y L, y esta en "Parametros del estudio".
 % Las diapositivas de animacion no tienen leyenda, asi que llevan rho y eta.
 
-% --- Frame 15 ---
+% --- Frame 14 ---
 \seccion{Resultados}
 
 % ------------------------------------------------------------
-% b) Evolucion temporal de la polarizacion   (frames 16-30)
+% b) Evolucion temporal de la polarizacion   (frames 15-23)
+% Flujo: Estándar (8,4,2) -> Votante (8,4,2) -> Comparación
 % ------------------------------------------------------------
 
-% --- Frame 14 ---
-\begin{frame}{Animación --- Estándar \libre{$\rho = 2\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0.5$}{https://youtu.be/XXXXX}%
-          {$\eta=3.5$}{https://youtu.be/XXXXX}
-\end{frame}
-
 % --- Frame 15 ---
-\begin{frame}{Polarización vs tiempo --- Estándar \libre{$\rho = 2\;\uu{m^{-2}}$}}
-  \figuno{entrega/b/evolucion_va_ruidos_30000_rho2.png}
-\end{frame}
-
-% --- Frame 16 ---
-\begin{frame}{Animación --- Votante \libre{$\rho = 2\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0.05$}{https://youtu.be/XXXXX}%
-          {$\eta=0.5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 17 ---
-\begin{frame}{Polarización vs tiempo --- Votante \libre{$\rho = 2\;\uu{m^{-2}}$}}
-  \figuno{entrega/b/evolucion_va_voter_30000_rho2.png}
-\end{frame}
-
-% --- Frame 18 ---
-\begin{frame}{Comparación Estándar vs Votante --- $v_a(t)$ \libre{$\rho = 2\;\uu{m^{-2}}$}}
-  \figdos{entrega/b/evolucion_va_ruidos_30000_rho2.png}%
-    {Estándar}%
-    {entrega/b/evolucion_va_voter_30000_rho2.png}%
-    {Votante}
-\end{frame}
-
-% --- Frame 19 ---
-\begin{frame}{Animación --- Estándar \libre{$\rho = 4\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0.5$}{https://youtu.be/XXXXX}%
-          {$\eta=3.5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 20 ---
-\begin{frame}{Polarización vs tiempo --- Estándar \libre{$\rho = 4\;\uu{m^{-2}}$}}
-  \figuno{entrega/b/evolucion_va_ruidos_30000.png}
-\end{frame}
-
-% --- Frame 21 ---
-\begin{frame}{Animación --- Votante \libre{$\rho = 4\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0.05$}{https://youtu.be/XXXXX}%
-          {$\eta=0.5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 22 ---
-\begin{frame}{Polarización vs tiempo --- Votante \libre{$\rho = 4\;\uu{m^{-2}}$}}
-  \figuno{entrega/b/evolucion_va_voter_30000.png}
-\end{frame}
-
-% --- Frame 23 ---
-\begin{frame}{Comparación Estándar vs Votante --- $v_a(t)$ \libre{$\rho = 4\;\uu{m^{-2}}$}}
-  \figdos{entrega/b/evolucion_va_ruidos_30000.png}%
-    {Estándar}%
-    {entrega/b/evolucion_va_voter_30000.png}%
-    {Votante}
-\end{frame}
-
-% --- Frame 24 ---
 \begin{frame}{Animación --- Estándar \libre{$\rho = 8\;\uu{m^{-2}}$}}
   \animdos{$\eta=0.5$}{https://youtu.be/XXXXX}%
           {$\eta=3.5$}{https://youtu.be/XXXXX}
 \end{frame}
 
-% --- Frame 25 ---
+% --- Frame 16 ---
 \begin{frame}{Polarización vs tiempo --- Estándar \libre{$\rho = 8\;\uu{m^{-2}}$}}
   \figuno{entrega/b/evolucion_va_ruidos_30000_rho8.png}
 \end{frame}
 
-% --- Frame 26 ---
+% --- Frame 17 ---
+\begin{frame}{Polarización vs tiempo --- Estándar \libre{$\rho = 4\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_ruidos_30000.png}
+\end{frame}
+
+% --- Frame 18 ---
+\begin{frame}{Polarización vs tiempo --- Estándar \libre{$\rho = 2\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_ruidos_30000_rho2.png}
+\end{frame}
+
+% --- Frame 19 ---
 \begin{frame}{Animación --- Votante \libre{$\rho = 8\;\uu{m^{-2}}$}}
   \animdos{$\eta=0.05$}{https://youtu.be/XXXXX}%
           {$\eta=0.5$}{https://youtu.be/XXXXX}
 \end{frame}
 
-% --- Frame 27 ---
+% --- Frame 20 ---
 \begin{frame}{Polarización vs tiempo --- Votante \libre{$\rho = 8\;\uu{m^{-2}}$}}
   \figuno{entrega/b/evolucion_va_voter_30000_rho8.png}
 \end{frame}
 
-% --- Frame 28 ---
+% --- Frame 21 ---
+\begin{frame}{Polarización vs tiempo --- Votante \libre{$\rho = 4\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_voter_30000.png}
+\end{frame}
+
+% --- Frame 22 ---
+\begin{frame}{Polarización vs tiempo --- Votante \libre{$\rho = 2\;\uu{m^{-2}}$}}
+  \figuno{entrega/b/evolucion_va_voter_30000_rho2.png}
+\end{frame}
+
+% --- Frame 23 ---
 \begin{frame}{Comparación Estándar vs Votante --- $v_a(t)$ \libre{$\rho = 8\;\uu{m^{-2}}$}}
   \figdos{entrega/b/evolucion_va_ruidos_30000_rho8.png}%
     {Estándar}%
@@ -518,160 +470,88 @@
 \end{frame}
 
 % ------------------------------------------------------------
-% c) Polarizacion media vs ruido   (frames 29-38)
+% c) Polarizacion media vs ruido   (frames 24-26)
+% (Se eliminaron las densidades bajas)
 % ------------------------------------------------------------
 
-% --- Frame 29 ---
-\begin{frame}{Animación --- Estándar \libre{$\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 30 ---
+% --- Frame 24 ---
 \begin{frame}{Polarización media vs ruido --- Estándar}
-  \figuno{entrega/c/c_standard_3dens_30000.png}
+  \figuno{entrega/c/c_standard_3dens.png}
 \end{frame}
 
-% --- Frame 31 ---
-\begin{frame}{Animación --- Votante \libre{$\rho = 2;\ 4;\ 8\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=1$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 32 ---
+% --- Frame 25 ---
 \begin{frame}{Polarización media vs ruido --- Votante}
-  \figuno{entrega/c/c_voter_3dens_30000.png}
+  \figuno{entrega/c/c_voter_3dens.png}
 \end{frame}
 
-% --- Frame 33 ---
+% --- Frame 26 ---
 \begin{frame}{Comparación Estándar vs Votante --- $\langle v_a \rangle$ vs $\eta$}
-  \figdos{entrega/c/c_standard_3dens_30000.png}%
+  \figdos{entrega/c/c_standard_3dens.png}%
     {Estándar}%
-    {entrega/c/c_voter_3dens_30000.png}%
-    {Votante}
-\end{frame}
-
-% --- Frame 34 ---
-\begin{frame}{Animación --- Estándar}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 35 ---
-\begin{frame}{Polarización media vs ruido --- Estándar}
-  \figuno{entrega/c/c_standard_lowdens_30000.png}
-\end{frame}
-
-% --- Frame 36 ---
-\begin{frame}{Animación --- Votante}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=1$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 37 ---
-\begin{frame}{Polarización media vs ruido --- Votante}
-  \figuno{entrega/c/c_voter_lowdens_30000.png}
-\end{frame}
-
-% --- Frame 38 ---
-\begin{frame}{Comparación Estándar vs Votante --- $\langle v_a \rangle$ vs $\eta$}
-  \figdos{entrega/c/c_standard_lowdens_30000.png}%
-    {Estándar}%
-    {entrega/c/c_voter_lowdens_30000.png}%
+    {entrega/c/c_voter_3dens.png}%
     {Votante}
 \end{frame}
 
 % ------------------------------------------------------------
-% d) Cluster mas grande   (frames 39-48)
+% d) Cluster mas grande   (frames 27-33)
+% Flujo: Estándar (d1,d2) -> Votante (d1,d2) -> Comparación
 % ------------------------------------------------------------
 
-% --- Frame 39 ---
+% --- Frame 27 ---
 \begin{frame}{Animación --- Estándar \libre{$\eta=0.5$}}
   \animdos{$\rho=2\;\uu{m^{-2}}$}{https://youtu.be/XXXXX}%
           {$\rho=1/\pi\;\uu{m^{-2}}$}{https://youtu.be/XXXXX}
 \end{frame}
 
-% --- Frame 40 ---
+% --- Frame 28 ---
 \begin{frame}{Cluster más grande vs tiempo --- Estándar \libre{$\eta = 0.5$}}
   \figuno{entrega/d1/d1_standard_2_vs_low_30000.png}
 \end{frame}
 
-% --- Frame 41 ---
+% --- Frame 29 ---
+\begin{frame}{Cluster más grande vs ruido --- Estándar}
+  \figuno{entrega/d2/d2_standard_2_vs_low_30000.png}
+\end{frame}
+
+% --- Frame 30 ---
 \begin{frame}{Animación --- Votante \libre{$\eta=0.1$}}
   \animdos{$\rho=2\;\uu{m^{-2}}$}{https://youtu.be/XXXXX}%
           {$\rho=1/\pi\;\uu{m^{-2}}$}{https://youtu.be/XXXXX}
 \end{frame}
 
-% --- Frame 42 ---
+% --- Frame 31 ---
 \begin{frame}{Cluster más grande vs tiempo --- Votante \libre{$\eta = 0.1$}}
   \figuno{entrega/d1/d1_voter_2_vs_low_30000.png}
 \end{frame}
 
-% --- Frame 43 ---
-\begin{frame}{Comparación Estándar vs Votante --- $S(t)$}
+% --- Frame 32 ---
+\begin{frame}{Cluster más grande vs ruido --- Votante}
+  \figuno{entrega/d2/d2_voter_2_vs_low_30000.png}
+\end{frame}
+
+% --- Frame 33 ---
+\begin{frame}{Comparación Estándar vs Votante --- $S$}
   \figdos{entrega/d1/d1_standard_2_vs_low_30000.png}%
     {Estándar ($\eta = 0.5$)}%
     {entrega/d1/d1_voter_2_vs_low_30000.png}%
     {Votante ($\eta = 0.1$)}
 \end{frame}
 
-% --- Frame 44 ---
-\begin{frame}{Animación --- Estándar \libre{$\rho = 2$ y $1/\pi\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 45 ---
-\begin{frame}{Cluster más grande vs ruido --- Estándar}
-  \figuno{entrega/d2/d2_standard_2_vs_low_30000.png}
-\end{frame}
-
-% --- Frame 46 ---
-\begin{frame}{Animación --- Votante \libre{$\rho = 2$ y $1/\pi\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=1$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 47 ---
-\begin{frame}{Cluster más grande vs ruido --- Votante}
-  \figuno{entrega/d2/d2_voter_2_vs_low_30000.png}
-\end{frame}
-
-% --- Frame 48 ---
-\begin{frame}{Comparación Estándar vs Votante --- $\langle S \rangle$ vs $\eta$}
-  \figdos{entrega/d2/d2_standard_2_vs_low_30000.png}%
-    {Estándar}%
-    {entrega/d2/d2_voter_2_vs_low_30000.png}%
-    {Votante}
-\end{frame}
-
 % ------------------------------------------------------------
-% e) Polarizacion vs componente gigante   (frames 49-53)
+% e) Polarizacion vs componente gigante   (frames 34-36)
 % ------------------------------------------------------------
 
-% --- Frame 49 ---
-\begin{frame}{Animación --- Estándar \libre{$\rho = 1/(3\pi);\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0$}{https://youtu.be/XXXXX}%
-          {$\eta=5$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 50 ---
+% --- Frame 34 ---
 \begin{frame}{Polarización vs componente gigante --- Estándar \libre{9 valores de $\eta$ entre $0$ y $5$}}
   \figuno{entrega/e/e_standard_4dens_30000.png}
 \end{frame}
 
-% --- Frame 51 ---
-\begin{frame}{Animación --- Votante \libre{$\rho = 1/(3\pi);\ 1/\pi;\ 2;\ 8\;\uu{m^{-2}}$}}
-  \animdos{$\eta=0.05$}{https://youtu.be/XXXXX}%
-          {$\eta=1$}{https://youtu.be/XXXXX}
-\end{frame}
-
-% --- Frame 52 ---
+% --- Frame 35 ---
 \begin{frame}{Polarización vs componente gigante --- Votante \libre{7 valores de $\eta$ entre $0.05$ y $1$}}
   \figuno{entrega/e/e_voter_4dens_30000.png}
 \end{frame}
 
-% --- Frame 53 ---
+% --- Frame 36 ---
 \begin{frame}{Comparación Estándar vs Votante --- $\langle v_a \rangle$ vs $\langle S \rangle$}
   \figdos{entrega/e/e_standard_4dens_30000.png}%
     {Estándar}%
@@ -681,13 +561,13 @@
 
 % ============================================================
 \section{Desempeño del CIM}
-% Frames 56-57
+% Frames 37-38
 % ============================================================
 
-% --- Frame 56 ---
+% --- Frame 37 ---
 \seccion{Desempeño del CIM}
 
-% --- Frame 57 ---
+% --- Frame 38 ---
 \begin{frame}{Tiempos de ejecución del CIM}
   \begin{columns}[T,onlytextwidth]
     \column{0.82\textwidth}
@@ -718,13 +598,13 @@
 
 % ============================================================
 \section{Conclusiones}
-% Frames 58-60
+% Frames 39-41
 % ============================================================
 
-% --- Frame 58 ---
+% --- Frame 39 ---
 \seccion{Conclusiones}
 
-% --- Frame 59 ---
+% --- Frame 40 ---
 \begin{frame}{Conclusiones}
   \begin{enumerate}
     \item % TODO: transicion de fase del modelo estandar segun eta
@@ -735,7 +615,7 @@
   \end{enumerate}
 \end{frame}
 
-% --- Frame 60: Cierre ---
+% --- Frame 41: Cierre ---
 \begin{frame}
   \begin{center}
     \vfill
