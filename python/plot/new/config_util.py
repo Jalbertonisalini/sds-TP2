@@ -34,10 +34,10 @@ FRACCIONES_DENSIDAD = [
 EPS_DENSIDAD = 1e-6
 
 
-def etiqueta_densidad(densidad):
+def etiqueta_densidad(densidad, unidad=""):
     """Convierte una densidad (string o numero) a su etiqueta de leyenda.
     Las fracciones de pi se muestran como 1/pi, 1/(2pi), etc.; el resto se
-    muestra tal cual (2, 4, 8, ...)."""
+    muestra tal cual (2, 4, 8, ...). Si se provee unidad, se anexa al final."""
     try:
         valor = float(densidad)
     except (TypeError, ValueError):
@@ -46,8 +46,13 @@ def etiqueta_densidad(densidad):
     valor = round(valor, 3)
     for frac, etiqueta in FRACCIONES_DENSIDAD:
         if abs(valor - frac) < EPS_DENSIDAD:
-            return etiqueta
-    return str(int(valor)) if float(valor).is_integer() else str(valor)
+            base = etiqueta
+            break
+    else:
+        base = str(int(valor)) if float(valor).is_integer() else str(valor)
+    if unidad:
+        return base + r" \; \mathrm{" + unidad + "}"
+    return base
 
 
 def modelo_de_directorio(directorio):

@@ -39,7 +39,7 @@ def graficar(directorios, modelo, eta, archivo_salida=None):
 
         t_inicio = t_inicio_para(modelo, densidad, eta, tinicios)
         ax.plot(t, S, color=color, linewidth=1.8,
-                label=f"$\\rho={etiqueta_densidad(densidad)}$")
+                label=f"$\\rho={etiqueta_densidad(densidad, unidad=r'm^{-2}')}$")
         ax.axvline(t_inicio, color=color, linestyle="--", linewidth=1.6, alpha=0.7)
 
     ax.set_xlabel("Pasos", fontsize=FUENTE)

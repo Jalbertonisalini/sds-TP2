@@ -62,7 +62,7 @@ def graficar(directorios, modelo, etas, archivo_salida=None):
         x_lo, x_hi = clamp_err(xs, xs_err)
         # Curva + marcadores sin transparencia; barras de error (x) casi transparentes.
         ax.plot(xs, ys, "o-", color=color, linewidth=1.2, markersize=5,
-                label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio))}$")
+                label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio), unidad=r'm^{-2}')}$")
         ax.errorbar(
             xs, ys, xerr=[x_lo, x_hi],
             fmt="none", capsize=3, linewidth=1, elinewidth=1, color=color,

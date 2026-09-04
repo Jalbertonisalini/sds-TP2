@@ -68,7 +68,7 @@ def graficar(directorios, modelo, archivo_salida=None):
         ax.errorbar(
             resumen["eta"], resumen["S_media"], yerr=[lo_err, hi_err],
             fmt="o-", capsize=3, linewidth=1.2, markersize=5, color=color,
-            label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio))}$",
+            label=f"$\\rho={etiqueta_densidad(densidad_de_directorio(directorio), unidad=r'm^{-2}')}$",
         )
 
     refs = {
